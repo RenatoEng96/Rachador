@@ -474,9 +474,9 @@
                     <span class="font-bold text-slate-400">Rachador &copy; 2026</span>
                 </div>
                 <div class="flex gap-6 font-bold">
-                    <a href="#" class="hover:text-white transition-colors">Termos</a>
-                    <a href="#" class="hover:text-white transition-colors">Privacidade</a>
-                    <a href="#" class="hover:text-white transition-colors">Suporte</a>
+                    <a href="#" onclick="openTermsModal(event)" class="hover:text-white transition-colors">Termos</a>
+                    <a href="#" onclick="openPrivacyModal(event)" class="hover:text-white transition-colors">Privacidade</a>
+                    <a href="#" onclick="openSupportModal(event)" class="hover:text-white transition-colors">Suporte</a>
                 </div>
             </footer>
         </section>
@@ -1081,6 +1081,250 @@
 
                     <button onclick="savePlacarConfig()" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-lg flex justify-center items-center gap-2 mt-4 transition-colors">
                         <i data-lucide="check" class="w-5 h-5"></i> SALVAR E APLICAR
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Termos de Uso -->
+        <div id="termsModal" class="fixed inset-0 bg-slate-950/80 z-[200] hidden flex-col items-center justify-center backdrop-blur-sm px-4 animate-in fade-in">
+            <div class="bg-slate-800 p-6 sm:p-8 rounded-2xl shadow-2xl border border-slate-700 max-w-2xl w-full max-h-[85vh] flex flex-col">
+                <div class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
+                    <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i data-lucide="file-text" class="text-green-500 w-6 h-6"></i> Termos de Uso
+                    </h3>
+                    <button onclick="closeTermsModal()" class="text-slate-400 hover:text-white transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+                </div>
+                <div class="overflow-y-auto space-y-4 pr-2 text-slate-300 text-sm leading-relaxed scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
+                    <p class="text-xs text-slate-400 italic">Última atualização: 17 de Maio de 2026</p>
+                    
+                    <h4 class="text-base font-bold text-white mt-4 border-l-2 border-green-500 pl-2">1. Aceitação dos termos</h4>
+                    <p>Ao acessar ou usar o Rachador, você concorda com estes Termos de Uso. O serviço é operado por Renato (contato.compost949@slmails.com). Se não concordar com qualquer parte dos termos, não utilize o serviço.</p>
+                    
+                    <h4 class="text-base font-bold text-white mt-4 border-l-2 border-green-500 pl-2">2. Descrição do serviço</h4>
+                    <p>O Rachador é uma plataforma que auxilia na organização de partidas esportivas recorrentes. Como jogador, você terá acesso a funcionalidades como: confirmação de presença, visualização de cobranças, informações sobre partidas e comunicação com o organizador.</p>
+                    
+                    <h4 class="text-base font-bold text-white mt-4 border-l-2 border-green-500 pl-2">3. Conta de usuário</h4>
+                    <p>Ao se cadastrar, você fornece dados pessoais como nome, e-mail, telefone (WhatsApp) e, opcionalmente, data de nascimento e posição de jogo.</p>
+                    <ul class="list-disc list-inside space-y-1 pl-2 text-slate-400">
+                        <li>A autenticação é via conta Google (OAuth) ou email e senha.</li>
+                        <li>Você é responsável pela veracidade das informações cadastradas.</li>
+                        <li>É proibido criar contas com o objetivo de manipular votos ou rankings.</li>
+                        <li>Reservamo-nos o direito de suspender contas que violem estes termos.</li>
+                    </ul>
+                    
+                    <h4 class="text-base font-bold text-white mt-4 border-l-2 border-green-500 pl-2">4. Conteúdo do usuário</h4>
+                    <p>Ao se cadastrar, você declara possuir os direitos sobre as imagens e descrições enviadas. É proibido publicar conteúdo ofensivo, enganoso, ilegal ou que viole direitos de terceiros. Podemos remover conteúdo sem aviso prévio em caso de violação.</p>
+                    
+                    <h4 class="text-base font-bold text-white mt-4 border-l-2 border-green-500 pl-2">5. Pagamentos</h4>
+                    <p>A Plataforma facilita a cobrança de valores definidos pelo organizador do jogo (mensalidades ou diárias). A relação financeira é diretamente entre você e o organizador. A Empresa atua apenas como intermediária tecnológica e não é parte na relação de pagamento.</p>
+                    
+                    <h4 class="text-base font-bold text-white mt-4 border-l-2 border-green-500 pl-2">6. Limitação de responsabilidade</h4>
+                    <p>O Rachador é fornecido "como está". Não nos responsabilizamos por danos resultantes do uso ou impossibilidade de uso do serviço, imprecisões nas listagens de produtos de terceiros, ou interrupções de serviço.</p>
+                    
+                    <h4 class="text-base font-bold text-white mt-4 border-l-2 border-green-500 pl-2">7. Privacidade</h4>
+                    <p>O tratamento de dados pessoais é descrito em nossa Política de Privacidade.</p>
+                    
+                    <h4 class="text-base font-bold text-white mt-4 border-l-2 border-green-500 pl-2">8. Alterações</h4>
+                    <p>Podemos atualizar estes termos a qualquer momento. O uso continuado do serviço após alterações constitui aceite dos novos termos.</p>
+                    
+                    <h4 class="text-base font-bold text-white mt-4 border-l-2 border-green-500 pl-2">9. Lei aplicável</h4>
+                    <p>Estes termos são regidos pela legislação brasileira. Fica eleito o foro da comarca de Ouricuri/PE para dirimir quaisquer controvérsias.</p>
+                    
+                    <h4 class="text-base font-bold text-white mt-4 border-l-2 border-green-500 pl-2">10. Propriedade Intelectual</h4>
+                    <p>Todo o conteúdo da Plataforma, incluindo marca, design, código e funcionalidades, é de propriedade exclusiva de Renato e protegido por leis de propriedade intelectual.</p>
+                    
+                    <h4 class="text-base font-bold text-white mt-4 border-l-2 border-green-500 pl-2">11. Contato</h4>
+                    <p class="text-slate-400">Renato<br><a href="mailto:contato.compost949@slmails.com" class="text-green-400 hover:underline">contato.compost949@slmails.com</a></p>
+                </div>
+                <div class="mt-6 border-t border-slate-700 pt-4 flex justify-end">
+                    <button onclick="closeTermsModal()" class="bg-green-500 hover:bg-green-600 text-slate-900 font-bold px-6 py-2 rounded-xl transition-all active:scale-95 text-sm flex items-center gap-2">
+                        <i data-lucide="check" class="w-4 h-4"></i> Entendi
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Política de Privacidade -->
+        <div id="privacyModal" class="fixed inset-0 bg-slate-950/80 z-[200] hidden flex-col items-center justify-center backdrop-blur-sm px-4 animate-in fade-in">
+            <div class="bg-slate-800 p-6 sm:p-8 rounded-2xl shadow-2xl border border-slate-700 max-w-2xl w-full max-h-[85vh] flex flex-col">
+                <div class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
+                    <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i data-lucide="shield-check" class="text-blue-500 w-6 h-6"></i> Política de Privacidade
+                    </h3>
+                    <button onclick="closePrivacyModal()" class="text-slate-400 hover:text-white transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+                </div>
+                <div class="overflow-y-auto space-y-4 pr-2 text-slate-300 text-sm leading-relaxed scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
+                    <p class="text-xs text-slate-400 italic">Última atualização: 17 de Maio de 2026</p>
+                    
+                    <h4 class="text-base font-bold text-white mt-4 border-l-2 border-blue-500 pl-2">1. Identificação do Controlador</h4>
+                    <p>Esta Política de Privacidade descreve como o Rachador coleta, utiliza, compartilha e protege os dados pessoais dos usuários.</p>
+                    <p>Para os fins da Lei Geral de Proteção de Dados (LGPD — Lei nº 13.709/2018), o Rachador atua como controlador dos dados pessoais coletados na plataforma.</p>
+                    <p class="text-slate-400">Contato do encarregado de proteção de dados: <a href="mailto:contato.compost949@slmails.com" class="text-blue-400 hover:underline">contato.compost949@slmails.com</a></p>
+                    
+                    <h4 class="text-base font-bold text-white mt-4 border-l-2 border-blue-500 pl-2">2. Dados Pessoais Coletados</h4>
+                    <p>Coletamos as seguintes categorias de dados pessoais:</p>
+                    <ul class="list-disc list-inside space-y-1 pl-2 text-slate-400">
+                        <li><strong class="text-slate-300">Dados de cadastro (organizador e jogador):</strong> nome, e-mail, telefone (WhatsApp), senha (armazenada de forma criptografada), fotos.</li>
+                        <li><strong class="text-slate-300">Dados complementares (jogador):</strong> apelido, data de nascimento, posição de jogo, nível técnico.</li>
+                        <li><strong class="text-slate-300">Dados de uso da plataforma:</strong> partidas organizadas, confirmações de presença, mensagens enviadas, histórico de pagamentos, configurações de jogo.</li>
+                        <li><strong class="text-slate-300">Dados técnicos:</strong> endereço IP, tipo de navegador, sistema operacional, identificadores de sessão, registros de acesso (logs).</li>
+                        <li><strong class="text-slate-300">Comunicações:</strong> cobranças e avisos do jogo.</li>
+                    </ul>
+                    
+                    <h5 class="text-sm font-bold text-white mt-2">2.2 Cadastro via Google OAuth</h5>
+                    <p>Ao entrar com sua conta Google, coletamos:</p>
+                    <ul class="list-disc list-inside space-y-1 pl-2 text-slate-400">
+                        <li><strong class="text-slate-300">Nome:</strong> exibição no perfil e nos produtos cadastrados.</li>
+                        <li><strong class="text-slate-300">E-mail:</strong> identificação única da conta.</li>
+                        <li><strong class="text-slate-300">Google UID:</strong> vinculação segura da conta Google à conta local.</li>
+                    </ul>
+                    <p class="text-xs text-slate-400">Base legal: execução de contrato / cumprimento de obrigação (LGPD, art. 7º, V).</p>
+                    
+                    <h4 class="text-base font-bold text-white mt-4 border-l-2 border-blue-500 pl-2">3. Terceiros que recebem dados</h4>
+                    <ul class="list-disc list-inside space-y-1 pl-2 text-slate-400">
+                        <li><strong class="text-slate-300">Google LLC (OAuth, Analytics e Firebase):</strong> autenticação e análise de uso.</li>
+                        <li><strong class="text-slate-300">Outros jogadores e organizadores do mesmo grupo:</strong> nome, apelido, telefone e status de presença/pagamento ficam visíveis aos demais participantes do mesmo jogo, conforme a função da plataforma.</li>
+                        <li><strong class="text-slate-300">Provedores de análise e monitoramento:</strong> ferramentas de telemetria para identificar erros e melhorar o produto.</li>
+                        <li><strong class="text-slate-300">Consultores profissionais:</strong> jurídicos, contábeis e de auditoria, quando necessário.</li>
+                        <li><strong class="text-slate-300">Autoridades públicas:</strong> quando exigido por lei, ordem judicial ou requisição administrativa legítima.</li>
+                    </ul>
+                    <p class="text-xs text-slate-400 mt-2">Não vendemos nem compartilhamos seus dados com terceiros fora dos listados acima.</p>
+                    
+                    <h4 class="text-base font-bold text-white mt-4 border-l-2 border-blue-500 pl-2">4. Retenção de dados</h4>
+                    <ul class="list-disc list-inside space-y-1 pl-2 text-slate-400">
+                        <li><strong class="text-slate-300">Dados da conta:</strong> enquanto a conta existir.</li>
+                        <li><strong class="text-slate-300">Histórico:</strong> enquanto a conta existir.</li>
+                        <li><strong class="text-slate-300">Após exclusão da conta:</strong> dados removidos imediatamente, exceto onde houver obrigação legal de retenção.</li>
+                    </ul>
+                    
+                    <h4 class="text-base font-bold text-white mt-4 border-l-2 border-blue-500 pl-2">5. Finalidades e Bases Legais do Tratamento</h4>
+                    <p>Tratamos seus dados pessoais para as seguintes finalidades:</p>
+                    <ul class="list-disc list-inside space-y-1 pl-2 text-slate-400">
+                        <li>Criação e gestão da conta — base legal: execução de contrato.</li>
+                        <li>Prestação dos serviços da plataforma (organização de partidas, confirmação de presença, cobrança, sorteio de times, comunicação via WhatsApp) — base legal: execução de contrato.</li>
+                        <li>Envio de notificações operacionais (e-mails transacionais e mensagens WhatsApp relativas ao jogo) — base legal: execução de contrato e legítimo interesse.</li>
+                        <li>Prevenção a fraudes e proteção da plataforma — base legal: legítimo interesse.</li>
+                        <li>Suporte ao usuário — base legal: execução de contrato.</li>
+                        <li>Melhoria do produto e análise de uso — base legal: legítimo interesse.</li>
+                        <li>Comunicações de marketing (quando aplicável) — base legal: consentimento, podendo ser revogado a qualquer momento.</li>
+                        <li>Cumprimento de obrigações legais e regulatórias — base legal: cumprimento de obrigação legal.</li>
+                    </ul>
+                    
+                    <h4 class="text-base font-bold text-white mt-4 border-l-2 border-blue-500 pl-2">6. Seus direitos (LGPD, art. 18)</h4>
+                    <p>Você tem direito a:</p>
+                    <ul class="list-disc list-inside space-y-1 pl-2 text-slate-400">
+                        <li><strong class="text-slate-300">Acesso:</strong> confirmar se tratamos seus dados e obter uma cópia.</li>
+                        <li><strong class="text-slate-300">Correção:</strong> atualizar dados incompletos ou desatualizados.</li>
+                        <li><strong class="text-slate-300">Exclusão:</strong> solicitar a remoção dos seus dados.</li>
+                        <li><strong class="text-slate-300">Revogação do consentimento:</strong> desativar cookies analíticos a qualquer momento via banner de cookies.</li>
+                        <li><strong class="text-slate-300">Portabilidade:</strong> receber seus dados em formato estruturado.</li>
+                        <li><strong class="text-slate-300">Informação:</strong> saber com quais terceiros compartilhamos seus dados.</li>
+                    </ul>
+                    <p>Para exercer qualquer direito, envie um e-mail para <a href="mailto:contato.compost949@slmails.com" class="text-blue-400 hover:underline">contato.compost949@slmails.com</a>.</p>
+                    
+                    <h4 class="text-base font-bold text-white mt-4 border-l-2 border-blue-500 pl-2">7. Transferência Internacional</h4>
+                    <p>Alguns de nossos prestadores de serviço podem armazenar e processar dados fora do Brasil. Nesses casos, adotamos salvaguardas contratuais e técnicas adequadas para garantir nível de proteção compatível com a LGPD.</p>
+                    
+                    <h4 class="text-base font-bold text-white mt-4 border-l-2 border-blue-500 pl-2">8. Segurança da Informação</h4>
+                    <p>Adotamos medidas técnicas e organizacionais apropriadas para proteger seus dados pessoais contra acesso não autorizado, perda, alteração ou divulgação indevida, incluindo:</p>
+                    <ul class="list-disc list-inside space-y-1 pl-2 text-slate-400">
+                        <li>Criptografia em trânsito (HTTPS/TLS) e armazenamento seguro de senhas (hash).</li>
+                        <li>Controles de acesso baseados em função (Row-Level Security no banco de dados).</li>
+                        <li>Monitoramento contínuo de integrações e logs de auditoria.</li>
+                        <li>Políticas internas de acesso restrito a dados pessoais.</li>
+                        <li>Backups regulares e procedimentos de recuperação.</li>
+                    </ul>
+                    <p class="text-xs text-slate-400">Apesar dessas medidas, nenhum sistema é totalmente imune a falhas. Em caso de incidente de segurança que represente risco relevante aos titulares, comunicaremos a Autoridade Nacional de Proteção de Dados (ANPD) e os usuários afetados conforme a LGPD.</p>
+                    
+                    <h4 class="text-base font-bold text-white mt-4 border-l-2 border-blue-500 pl-2">9. Cookies e Tecnologias Similares</h4>
+                    <p>Utilizamos cookies e tecnologias similares essenciais para o funcionamento da plataforma (ex.: manter a sessão autenticada). Podemos também utilizar cookies analíticos para entender o uso da plataforma e melhorar a experiência. Você pode gerenciar cookies nas configurações do seu navegador, ciente de que a desativação de cookies essenciais pode compromenter o funcionamento da plataforma.</p>
+                    
+                    <h4 class="text-base font-bold text-white mt-4 border-l-2 border-blue-500 pl-2">10. Alterações nesta Política</h4>
+                    <p>Esta Política pode ser atualizada periodicamente. A versão vigente estará sempre disponível nesta página, com a data da última atualização. Em caso de alterações materiais, comunicaremos os usuários por e-mail ou aviso na plataforma.</p>
+                    
+                    <h4 class="text-base font-bold text-white mt-4 border-l-2 border-blue-500 pl-2">11. Contato</h4>
+                    <p class="text-slate-400">Para dúvidas, solicitações ou exercício de direitos relacionados a esta Política, entre em contato pelo e-mail <a href="mailto:contato.compost949@slmails.com" class="text-blue-400 hover:underline">contato.compost949@slmails.com</a>.</p>
+                </div>
+                <div class="mt-6 border-t border-slate-700 pt-4 flex justify-end">
+                    <button onclick="closePrivacyModal()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-6 py-2 rounded-xl transition-all active:scale-95 text-sm flex items-center gap-2">
+                        <i data-lucide="check" class="w-4 h-4"></i> Entendi
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Suporte -->
+        <div id="supportModal" class="fixed inset-0 bg-slate-950/80 z-[200] hidden flex-col items-center justify-center backdrop-blur-sm px-4 animate-in fade-in">
+            <div class="bg-slate-800 p-6 sm:p-8 rounded-2xl shadow-2xl border border-slate-700 max-w-lg w-full max-h-[85vh] flex flex-col">
+                <div class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
+                    <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i data-lucide="life-buoy" class="text-purple-500 w-6 h-6"></i> Suporte & Ajuda
+                    </h3>
+                    <button onclick="closeSupportModal()" class="text-slate-400 hover:text-white transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+                </div>
+                <div class="overflow-y-auto space-y-5 pr-2 text-slate-300 text-sm leading-relaxed scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
+                    <p class="text-slate-300">
+                        Precisa de ajuda com o Rachador? Estamos aqui para garantir que a sua experiência com a organização e placares de jogos seja perfeita!
+                    </p>
+                    
+                    <!-- Bloco de Email Principal -->
+                    <div class="bg-slate-900/60 rounded-xl p-4 border border-slate-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2.5 rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                                <i data-lucide="mail" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <span class="text-xs text-slate-400 font-bold uppercase block tracking-wider">E-mail Oficial</span>
+                                <span id="supportEmail" class="font-bold text-white text-sm">contato.compost949@slmails.com</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-2 w-full sm:w-auto text-center justify-center">
+                            <button onclick="copySupportEmail()" class="flex-1 sm:flex-none px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-bold border border-slate-700 transition-colors flex items-center justify-center gap-1 active:scale-95" title="Copiar e-mail">
+                                <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copiar
+                            </button>
+                            <a href="mailto:contato.compost949@slmails.com" class="flex-1 sm:flex-none px-3 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1 active:scale-95">
+                                <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Enviar
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Informações Extras -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="bg-slate-900/30 rounded-lg p-3 border border-slate-800 flex gap-2">
+                            <i data-lucide="clock" class="text-purple-400 w-4 h-4 shrink-0 mt-0.5"></i>
+                            <div>
+                                <h5 class="text-xs font-bold text-white uppercase">Prazo de Resposta</h5>
+                                <p class="text-[11px] text-slate-400 mt-1">Geralmente respondemos em até 24 horas úteis.</p>
+                            </div>
+                        </div>
+                        <div class="bg-slate-900/30 rounded-lg p-3 border border-slate-800 flex gap-2">
+                            <i data-lucide="message-square" class="text-purple-400 w-4 h-4 shrink-0 mt-0.5"></i>
+                            <div>
+                                <h5 class="text-xs font-bold text-white uppercase">Canais de Contato</h5>
+                                <p class="text-[11px] text-slate-400 mt-1">E-mail ou via administradora do seu grupo.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pequena FAQ -->
+                    <div class="border-t border-slate-700/60 pt-4">
+                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Dúvidas Frequentes</h4>
+                        <div class="space-y-3">
+                            <div class="bg-slate-900/20 rounded-lg p-3 border border-slate-800/80">
+                                <h5 class="text-xs font-bold text-white flex items-center gap-1.5"><i data-lucide="help-circle" class="w-3.5 h-3.5 text-purple-400"></i> Como crio um novo Racha?</h5>
+                                <p class="text-[11px] text-slate-400 mt-1">Após criar a sua conta, acesse a aba "Meus Grupos", clique em "Novo Racha", defina o nome e convide os participantes cadastrados.</p>
+                            </div>
+                            <div class="bg-slate-900/20 rounded-lg p-3 border border-slate-800/80">
+                                <h5 class="text-xs font-bold text-white flex items-center gap-1.5"><i data-lucide="help-circle" class="w-3.5 h-3.5 text-purple-400"></i> O cálculo de ELO é obrigatório?</h5>
+                                <p class="text-[11px] text-slate-400 mt-1">Não! Os administradores do grupo podem ativar ou desativar o sistema de pontuação dinâmica ELO a qualquer momento na aba de regras do Racha.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6 border-t border-slate-700 pt-4 flex justify-end">
+                    <button onclick="closeSupportModal()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-6 py-2 rounded-xl transition-all active:scale-95 text-sm flex items-center gap-2">
+                        <i data-lucide="check" class="w-4 h-4"></i> Fechar
                     </button>
                 </div>
             </div>

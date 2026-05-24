@@ -1607,3 +1607,67 @@ export const goHome = () => {
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
+
+export const openTermsModal = (event) => {
+    if (event) event.preventDefault();
+    const modal = document.getElementById('termsModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+};
+
+export const closeTermsModal = () => {
+    const modal = document.getElementById('termsModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+};
+
+export const openPrivacyModal = (event) => {
+    if (event) event.preventDefault();
+    const modal = document.getElementById('privacyModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+};
+
+export const closePrivacyModal = () => {
+    const modal = document.getElementById('privacyModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+};
+
+export const openSupportModal = (event) => {
+    if (event) event.preventDefault();
+    const modal = document.getElementById('supportModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+};
+
+export const closeSupportModal = () => {
+    const modal = document.getElementById('supportModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+};
+
+export const copySupportEmail = () => {
+    navigator.clipboard.writeText("contato.compost949@slmails.com")
+        .then(() => {
+            showToast("E-mail de suporte copiado!", "success");
+        })
+        .catch(() => {
+            showToast("Erro ao copiar e-mail.", "error");
+        });
+};

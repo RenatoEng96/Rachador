@@ -6,7 +6,9 @@ import {
     closeMoveModal, closePlayerHistoryModal, editPlayer, resetForm, openMoveModal,
     updateSorteioCounters, changeHistoryPage, openPlayerHistoryModal, togglePlacarLock, 
     forceUnlockPlacar, toggleAuthMode, renderUserGroups, setFormMode, renderAdminTable,
-    openPlacarConfigModal, closePlacarConfigModal, savePlacarConfig, playBeepSound, goHome
+    openPlacarConfigModal, closePlacarConfigModal, savePlacarConfig, playBeepSound, goHome,
+    openTermsModal, closeTermsModal, openPrivacyModal, closePrivacyModal,
+    openSupportModal, closeSupportModal, copySupportEmail
 } from './ui.js';
 import {
     drawTeams, createWaitlist, clearTeams, confirmMovePlayer, deleteTeam,
@@ -597,6 +599,8 @@ Object.assign(window, {
     handleImageUpload, removePhoto, adjustBonus, confirmMovePlayer, clearMatchHistory, 
     selectOnlyPlayersInTeams, closeMoveModal, closePlayerHistoryModal, editPlayer, resetForm, 
     openMoveModal, updateSorteioCounters, changeHistoryPage, openPlayerHistoryModal, forceUnlockPlacar, setFormMode, goHome,
+    openTermsModal, closeTermsModal, openPrivacyModal, closePrivacyModal,
+    openSupportModal, closeSupportModal, copySupportEmail,
     // NOVOS BINDINGS DE SAAS:
     handleAuthAction, toggleAuthMode, handlePasswordReset, handleLogout, handleGoogleLogin, 
     handleCreateGroup, selectGroup, saveUserProfile, removeUserProfilePhoto, renderAdminTable,
