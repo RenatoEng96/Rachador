@@ -82,16 +82,30 @@ export const renderPaymentsView = async () => {
     const adminDailyTable = document.getElementById('adminPaymentsTable');
     const userList = document.getElementById('userPendingChargesList');
 
-    // Renderiza relatório de mensalistas (sempre visível na aba monthly)
-    renderMonthlyView(isAdmin, currentMonthlyDay, adminMonthlyTable, userList);
+    // Cria sub-containers dedicados no painel do jogador para evitar que
+    // mensalidade e cobranças diárias se sobrescrevam mutuamente.
+    if (userList) {
+        userList.innerHTML = `
+            <div id="user-monthly-charges"></div>
+            <div id="user-daily-charges"></div>
+            <div id="user-pix-info"></div>
+        `;
+    }
 
-    // Renderiza relatório de diaristas (realtime na aba daily)
-    renderDailyView(isAdmin, adminDailyTable, userList);
+    const userMonthlyEl = document.getElementById('user-monthly-charges');
+    const userDailyEl   = document.getElementById('user-daily-charges');
+    const userPixEl     = document.getElementById('user-pix-info');
+
+    // Renderiza status mensal (sem PIX aqui — PIX será unificado depois)
+    renderMonthlyView(isAdmin, currentMonthlyDay, adminMonthlyTable, userMonthlyEl);
+
+    // Renderiza cobranças diárias em tempo real
+    renderDailyView(isAdmin, adminDailyTable, userDailyEl, userPixEl);
 
     renderCaixaView(isAdmin, userList);
 };
 
-const renderMonthlyView = (isAdmin, monthlyDay, adminTable, userList) => {
+const renderMonthlyView = (isAdmin, monthlyDay, adminTable, userMonthlyEl) => {
     const now = new Date();
 
     if (isAdmin && adminTable) {
@@ -115,34 +129,104 @@ const renderMonthlyView = (isAdmin, monthlyDay, adminTable, userList) => {
         });
     }
 
-    if (userList) {
-        userList.innerHTML = '';
-        const myPlayer = state.players.find(p => p.email === state.user.email);
-        
-        if (myPlayer) {
-            let nextDue = getNextDueDate(myPlayer.paidUntil, monthlyDay);
-            let isOverdue = now > nextDue;
-            
-            const statusColor = isOverdue ? 'text-red-400' : 'text-green-400';
-            const statusText = isOverdue ? 'Atrasado' : 'Em dia';
+    if (!userMonthlyEl) return;
 
-            userList.innerHTML = `
-                <div class="bg-slate-900 border border-slate-700 rounded-xl p-4 flex flex-col items-center text-center gap-4">
-                    <div>
-                        <h4 class="text-white font-bold text-lg mb-1">Status da Mensalidade</h4>
-                        <p class="text-sm text-slate-400">Seu vencimento é no dia <span class="font-bold text-white">${nextDue.toLocaleDateString()}</span></p>
-                        <p class="text-lg font-black ${statusColor} mt-2 uppercase">${statusText}</p>
-                    </div>
-                </div>
-            `;
-            
-            renderPixKeyInfo(userList, isOverdue ? "Faça o pagamento para ficar em dia." : "Pague antecipado se desejar.");
-        } else {
-            userList.innerHTML = `<div class="text-center text-slate-400 py-8 text-sm italic">Jogador não encontrado no grupo.</div>`;
-        }
+    const myPlayer = state.players.find(p => p.email === state.user.email);
+    if (!myPlayer) {
+        userMonthlyEl.innerHTML = `<div class="text-center text-slate-400 py-4 text-sm italic">Jogador não encontrado no grupo.</div>`;
+        return;
     }
+
+    let nextDue = getNextDueDate(myPlayer.paidUntil, monthlyDay);
+    const isOverdue = now > nextDue;
+    const statusColor = isOverdue ? 'text-red-400' : 'text-green-400';
+    const statusText  = isOverdue ? 'Atrasado' : 'Em dia';
+    const borderColor = isOverdue ? 'border-red-500/40' : 'border-slate-700';
+
+    userMonthlyEl.innerHTML = `
+        <div class="bg-slate-900 border ${borderColor} rounded-xl p-4 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-500/10 p-2 rounded-lg border border-blue-500/20 shrink-0">
+                    <i data-lucide="calendar" class="w-4 h-4 text-blue-400"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-400 font-bold uppercase">Mensalidade</p>
+                    <p class="text-sm text-slate-300">Venc: <span class="font-bold text-white">${nextDue.toLocaleDateString()}</span></p>
+                </div>
+            </div>
+            <span class="text-sm font-black ${statusColor} uppercase">${statusText}</span>
+        </div>
+    `;
+    if (isOverdue && currentPixKey) {
+        userMonthlyEl.innerHTML += renderPixKeyInfoHTML('Pague a mensalidade via PIX:');
+    }
+    if (typeof lucide !== 'undefined') lucide.createIcons();
 };
 
+window.addMonthlyPayment = async (playerId, playerName = '', direction = 1) => {
+    if (!state.currentGroupId) return;
+
+    const actionText = direction > 0 ? 'Adicionar' : 'Remover';
+    const dirText    = direction > 0 ? '+1 Mês'    : '-1 Mês';
+
+    openConfirmModal(`Confirmar ${dirText}`, `${actionText} 1 mês de pagamento para o jogador ${playerName}?`, async () => {
+        const settingsDoc = await getDoc(doc(db, 'groups', state.currentGroupId, 'paymentSettings', 'global'));
+        let monthlyDay   = 10;
+        let monthlyValue = 0;
+        if (settingsDoc.exists()) {
+            const data = settingsDoc.data();
+            monthlyDay   = data.monthlyDay   || 10;
+            monthlyValue = parseFloat(data.monthlyValue) || 0;
+        }
+
+        const playerRef = doc(db, 'groups', state.currentGroupId, 'players', playerId);
+        const playerDoc = await getDoc(playerRef);
+        if (!playerDoc.exists()) return;
+
+        const pData = playerDoc.data();
+        let nextDue = getNextDueDate(pData.paidUntil, monthlyDay);
+        const targetDueDateStr = nextDue.toLocaleDateString();
+        nextDue.setMonth(nextDue.getMonth() + direction);
+
+        try {
+            await updateDoc(playerRef, { paidUntil: nextDue.getTime() });
+
+            if (monthlyValue > 0) {
+                const desc = `Mensalidade - ${playerName} (Venc: ${targetDueDateStr})`;
+                await addDoc(collection(db, 'groups', state.currentGroupId, 'caixa'), {
+                    description: desc,
+                    value: monthlyValue,
+                    type: direction > 0 ? 'credit' : 'debit',
+                    createdAt: Date.now()
+                });
+            }
+
+            showToast('Pagamento de 1 mês registrado com sucesso!', 'success');
+            const pIndex = state.players.findIndex(p => p.id === playerId);
+            if (pIndex !== -1) state.players[pIndex].paidUntil = nextDue.getTime();
+            renderPaymentsView();
+        } catch (e) {
+            console.error(e);
+            showToast('Erro ao atualizar pagamento.', 'error');
+        }
+    });
+};
+
+// Retorna HTML da info PIX (string, sem fazer appendChild)
+const renderPixKeyInfoHTML = (message) => {
+    if (!currentPixKey) return '';
+    return `
+        <div class="mt-2 bg-slate-950 p-3 rounded-xl border border-slate-700 w-full text-center">
+            <p class="text-xs text-slate-400 mb-2">${message}</p>
+            <div class="flex items-center justify-center gap-2 bg-slate-900 p-2 rounded-lg border border-slate-700">
+                <span class="text-white font-mono text-sm break-all">${currentPixKey}</span>
+                <button onclick="copyAdminPixString()" class="bg-blue-600 hover:bg-blue-500 text-white p-2 rounded transition-colors" title="Copiar PIX">
+                    <i data-lucide="copy" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    `;
+};
 const getNextDueDate = (paidUntilMillis, monthlyDay) => {
     if (paidUntilMillis) {
         return new Date(paidUntilMillis);
@@ -157,101 +241,31 @@ const getNextDueDate = (paidUntilMillis, monthlyDay) => {
     }
 };
 
-window.addMonthlyPayment = async (playerId, playerName = '', direction = 1) => {
-    if (!state.currentGroupId) return;
-    
-    const actionText = direction > 0 ? "Adicionar" : "Remover";
-    const dirText = direction > 0 ? "+1 Mês" : "-1 Mês";
-    
-    openConfirmModal(`Confirmar ${dirText}`, `${actionText} 1 mês de pagamento para o jogador ${playerName}?`, async () => {
-        // Obter monthlyDay e monthlyValue da config
-        const settingsDoc = await getDoc(doc(db, 'groups', state.currentGroupId, 'paymentSettings', 'global'));
-        let monthlyDay = 10;
-        let monthlyValue = 0;
-        if (settingsDoc.exists()) {
-            const data = settingsDoc.data();
-            monthlyDay = data.monthlyDay || 10;
-            monthlyValue = parseFloat(data.monthlyValue) || 0;
-        }
-
-        const playerRef = doc(db, 'groups', state.currentGroupId, 'players', playerId);
-        const playerDoc = await getDoc(playerRef);
-        if (!playerDoc.exists()) return;
-        
-        const pData = playerDoc.data();
-        let nextDue = getNextDueDate(pData.paidUntil, monthlyDay);
-        
-        // Data do vencimento que está sendo pago/removido
-        const targetDueDateStr = nextDue.toLocaleDateString();
-        
-        // Adiciona ou remove 1 mês
-        nextDue.setMonth(nextDue.getMonth() + direction);
-        
-        try {
-            await updateDoc(playerRef, {
-                paidUntil: nextDue.getTime()
-            });
-            
-            // Adiciona no caixa se tiver valor
-            if (monthlyValue > 0) {
-                const desc = `Mensalidade - ${playerName} (Venc: ${targetDueDateStr})`;
-                await addDoc(collection(db, 'groups', state.currentGroupId, 'caixa'), {
-                    description: desc,
-                    value: monthlyValue,
-                    type: direction > 0 ? 'credit' : 'debit',
-                    createdAt: Date.now()
-                });
-            }
-            
-            showToast("Pagamento de 1 mês registrado com sucesso!", "success");
-            // Atualiza UI local
-            const pIndex = state.players.findIndex(p => p.id === playerId);
-            if (pIndex !== -1) {
-                state.players[pIndex].paidUntil = nextDue.getTime();
-            }
-            renderPaymentsView();
-        } catch (e) {
-            console.error(e);
-            showToast("Erro ao atualizar pagamento.", "error");
-        }
-    });
-};
 
 
-const renderDailyView = (isAdmin, adminTable, userList) => {
+const renderDailyView = (isAdmin, adminTable, userDailyEl, userPixEl) => {
     let chargesQuery;
-    
+
     if (isAdmin) {
         chargesQuery = collection(db, 'groups', state.currentGroupId, 'charges');
     } else {
         chargesQuery = query(collection(db, 'groups', state.currentGroupId, 'charges'), where('playerEmail', '==', state.user.email));
     }
-    
-    if (adminTable) {
-        const thead = adminTable.closest('table').querySelector('thead tr');
-        thead.innerHTML = `
-            <th class="px-4 py-3">Jogador</th>
-            <th class="px-4 py-3">Descrição</th>
-            <th class="px-4 py-3">Valor</th>
-            <th class="px-4 py-3 text-center">Status</th>
-            <th class="px-4 py-3 text-right">Ações</th>
-        `;
-    }
 
     unsubscribeCharges = onSnapshot(chargesQuery, (snapshot) => {
         const charges = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-        
+
         if (adminTable) adminTable.innerHTML = '';
-        if (userList) userList.innerHTML = '';
-        
-        let hasPendingForUser = false;
+        // NÃO limpa userDailyEl de uma só vez — reconstrói abaixo
+
+        let dailyPendingHTML = '';
+        let hasPending = false;
 
         charges.forEach(charge => {
-            // Renderiza na tabela do admin
+            // Tabela admin
             if (adminTable) {
                 const statusColor = charge.status === 'paid' ? 'text-green-500' : 'text-yellow-500';
-                const statusText = charge.status === 'paid' ? 'Pago' : 'Pendente';
-                
+                const statusText  = charge.status === 'paid' ? 'Pago' : 'Pendente';
                 adminTable.innerHTML += `
                     <tr>
                         <td class="px-4 py-3 font-bold text-white">${charge.playerName}</td>
@@ -260,8 +274,10 @@ const renderDailyView = (isAdmin, adminTable, userList) => {
                         <td class="px-4 py-3 text-center font-bold ${statusColor}">${statusText}</td>
                         <td class="px-4 py-3 text-right">
                             <div class="flex justify-end gap-2">
-                                ${charge.status !== 'paid' ? `<button onclick="markChargeAsPaid('${charge.id}', '${(charge.playerName || 'Jogador').replace(/'/g, "\\'")}')" class="bg-green-600 hover:bg-green-500 text-white px-2 py-1 rounded text-xs font-bold transition-colors">Pago</button>` : `<span class="text-slate-500 text-xs">-</span>`}
-                                <button onclick="deleteCharge('${charge.id}', '${(charge.playerName || 'Jogador').replace(/'/g, "\\'")}')" class="bg-red-600 hover:bg-red-500 text-white p-1 rounded transition-colors" title="Excluir Cobrança">
+                                ${charge.status !== 'paid' ? `<button onclick="markChargeAsPaid('${charge.id}', '${(charge.playerName||'Jogador').replace(/'/g,"\\'")}')"
+                                    class="bg-green-600 hover:bg-green-500 text-white px-2 py-1 rounded text-xs font-bold transition-colors">Pago</button>` : '<span class="text-slate-500 text-xs">-</span>'}
+                                <button onclick="deleteCharge('${charge.id}', '${(charge.playerName||'Jogador').replace(/'/g,"\\'")}')"
+                                    class="bg-red-600 hover:bg-red-500 text-white p-1 rounded transition-colors" title="Excluir">
                                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                                 </button>
                             </div>
@@ -270,27 +286,54 @@ const renderDailyView = (isAdmin, adminTable, userList) => {
                 `;
             }
 
-            // Renderiza no painel do usuário se for dele e estiver pendente
-            if (userList && charge.playerEmail === state.user.email && charge.status !== 'paid') {
-                hasPendingForUser = true;
-                userList.innerHTML += `
-                    <div class="bg-slate-900 border border-slate-700 rounded-xl p-4 flex flex-col justify-between items-start gap-2">
-                        <div>
-                            <h4 class="text-white font-bold">${charge.description}</h4>
-                            <p class="text-sm text-slate-400">Data: ${new Date(charge.createdAt).toLocaleDateString()}</p>
-                            <p class="text-lg font-black text-green-400 mt-1">R$ ${charge.value.toFixed(2)}</p>
+            // Painel do jogador — apenas pendentes do próprio usuário
+            if (charge.playerEmail === state.user?.email && charge.status !== 'paid') {
+                hasPending = true;
+                dailyPendingHTML += `
+                    <div class="bg-slate-900 border border-yellow-500/30 rounded-xl p-4 flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-purple-500/10 p-2 rounded-lg border border-purple-500/20 shrink-0">
+                                <i data-lucide="zap" class="w-4 h-4 text-purple-400"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-400 font-bold uppercase">Diária</p>
+                                <p class="text-sm font-bold text-white">${charge.description}</p>
+                                <p class="text-xs text-slate-400">${new Date(charge.createdAt).toLocaleDateString()}</p>
+                            </div>
                         </div>
+                        <span class="text-base font-black text-yellow-400 whitespace-nowrap">R$ ${charge.value.toFixed(2)}</span>
                     </div>
                 `;
             }
         });
 
-        if (!hasPendingForUser && userList) {
-            userList.innerHTML = `<div class="text-center text-slate-400 py-8 text-sm italic">Nenhuma cobrança pendente. Você está em dia! 🎉</div>`;
-        } else if (hasPendingForUser && userList) {
-            renderPixKeyInfo(userList, "Faça o pagamento da sua cobrança copiando a chave Pix abaixo e envie o comprovante.");
+        if (userDailyEl) {
+            if (hasPending) {
+                userDailyEl.innerHTML = dailyPendingHTML;
+            } else {
+                userDailyEl.innerHTML = '';
+            }
         }
-        
+
+        // Atualiza o bloco PIX unificado: mostra se houver qualquer pendência
+        if (userPixEl && currentPixKey) {
+            const userMonthlyEl = document.getElementById('user-monthly-charges');
+            const monthlyOverdue = userMonthlyEl && userMonthlyEl.innerHTML.includes('Atrasado');
+            if (hasPending || monthlyOverdue) {
+                userPixEl.innerHTML = renderPixKeyInfoHTML('Realize o pagamento via PIX e envie o comprovante:');
+            } else {
+                userPixEl.innerHTML = `<div class="text-center text-slate-400 py-6 text-sm italic">Você está em dia com todas as cobranças! 🎉</div>`;
+            }
+        } else if (userPixEl) {
+            if (!hasPending) {
+                const userMonthlyEl = document.getElementById('user-monthly-charges');
+                const monthlyOverdue = userMonthlyEl && userMonthlyEl.innerHTML.includes('Atrasado');
+                if (!monthlyOverdue) {
+                    userPixEl.innerHTML = `<div class="text-center text-slate-400 py-6 text-sm italic">Você está em dia com todas as cobranças! 🎉</div>`;
+                }
+            }
+        }
+
         if (typeof lucide !== 'undefined') lucide.createIcons();
     });
 };
