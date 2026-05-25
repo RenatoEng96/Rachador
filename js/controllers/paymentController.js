@@ -5,27 +5,25 @@ import { showToast, openConfirmModal } from '../ui.js';
 let unsubscribeCharges = null;
 let unsubscribeCaixa = null;
 let currentPixKey = '';
-let currentPaymentMode = 'free';
+let currentMonthlyValue = 0;
+let currentMonthlyDay = 10;
 let currentCaixaVisibility = false;
 let currentCaixaBalance = 0;
 
 export const setPaymentAdminTab = (tab) => {
-    // Esconde todas as tabs
-    ['config', 'status', 'caixa'].forEach(t => {
+    ['config', 'monthly', 'daily', 'caixa'].forEach(t => {
         const el = document.getElementById(`pay-admin-${t}`);
         const btn = document.getElementById(`tab-pay-${t}`);
-        if(el) el.classList.add('hidden');
-        if(btn) {
+        if (el) el.classList.add('hidden');
+        if (btn) {
             btn.classList.remove('bg-blue-600', 'text-white');
             btn.classList.add('bg-slate-700', 'text-slate-300');
         }
     });
-
-    // Mostra a tab selecionada
     const el = document.getElementById(`pay-admin-${tab}`);
     const btn = document.getElementById(`tab-pay-${tab}`);
-    if(el) el.classList.remove('hidden');
-    if(btn) {
+    if (el) el.classList.remove('hidden');
+    if (btn) {
         btn.classList.remove('bg-slate-700', 'text-slate-300');
         btn.classList.add('bg-blue-600', 'text-white');
     }
@@ -34,130 +32,82 @@ export const setPaymentAdminTab = (tab) => {
 export const renderPaymentsView = async () => {
     if (!state.currentGroupId) return;
 
-    // Remove listener antigo
     if (unsubscribeCharges) unsubscribeCharges();
     if (unsubscribeCaixa) unsubscribeCaixa();
 
     const isAdmin = state.currentUserRole === 'admin' || state.isMaster;
 
-    // Load global settings to know the mode and pix key
-    let monthlyDay = 10;
     try {
         const settingsDoc = await getDoc(doc(db, 'groups', state.currentGroupId, 'paymentSettings', 'global'));
         if (settingsDoc.exists()) {
             const data = settingsDoc.data();
-            currentPaymentMode = data.mode || 'free';
             currentPixKey = data.pixKey || '';
-            monthlyDay = data.monthlyDay || 10;
+            currentMonthlyValue = parseFloat(data.monthlyValue) || 0;
+            currentMonthlyDay = parseInt(data.monthlyDay) || 10;
             currentCaixaVisibility = data.caixaVisibility || false;
-            
+
             if (isAdmin) {
-            const modeRadio = document.querySelector(`input[name="paymentMode"][value="${currentPaymentMode}"]`);
-            if (modeRadio) modeRadio.checked = true;
-            
-            const ms = document.getElementById('monthlySettings');
-            const ds = document.getElementById('dailySettings');
-            if (currentPaymentMode === 'monthly') {
-                if (ms) { ms.classList.remove('hidden'); ms.classList.add('flex'); }
-                if (ds) { ds.classList.add('hidden'); ds.classList.remove('flex'); }
-            } else if (currentPaymentMode === 'daily') {
-                if (ms) { ms.classList.add('hidden'); ms.classList.remove('flex'); }
-                if (ds) { ds.classList.remove('hidden'); ds.classList.add('flex'); }
-            } else {
-                if (ms) { ms.classList.add('hidden'); ms.classList.remove('flex'); }
-                if (ds) { ds.classList.add('hidden'); ds.classList.remove('flex'); }
-            }
-            
-            if (data.monthlyValue) document.getElementById('payMonthlyValue').value = data.monthlyValue;
-            if (data.monthlyDay) document.getElementById('payMonthlyDay').value = data.monthlyDay;
-            if (data.pixKey) document.getElementById('adminPixKey').value = data.pixKey;
-            
-            const cvCheck = document.getElementById('caixaVisibility');
-            if(cvCheck) cvCheck.checked = currentCaixaVisibility;
+                const pixInput = document.getElementById('adminPixKey');
+                if (pixInput) pixInput.value = currentPixKey;
 
-            // Listener pros radios de mode
-            document.querySelectorAll('input[name="paymentMode"]').forEach(radio => {
-                radio.addEventListener('change', (e) => {
-                    const msElem = document.getElementById('monthlySettings');
-                    const dsElem = document.getElementById('dailySettings');
-                    if (e.target.value === 'monthly') {
-                        if (msElem) { msElem.classList.remove('hidden'); msElem.classList.add('flex'); }
-                        if (dsElem) { dsElem.classList.add('hidden'); dsElem.classList.remove('flex'); }
-                    } else if (e.target.value === 'daily') {
-                        if (msElem) { msElem.classList.add('hidden'); msElem.classList.remove('flex'); }
-                        if (dsElem) { dsElem.classList.remove('hidden'); dsElem.classList.add('flex'); }
-                    } else {
-                        if (msElem) { msElem.classList.add('hidden'); msElem.classList.remove('flex'); }
-                        if (dsElem) { dsElem.classList.add('hidden'); dsElem.classList.remove('flex'); }
-                    }
-                });
-            });
+                const mvInput = document.getElementById('payMonthlyValue');
+                if (mvInput) mvInput.value = currentMonthlyValue || '';
 
-            // Carrega a lista de jogadores para a tela de diária
-            const list = document.getElementById('diariaPlayersList');
-            if (list) {
-                list.innerHTML = '';
-                state.players.forEach(p => {
-                    list.innerHTML += `
-                        <label class="flex items-center gap-3 p-2 hover:bg-slate-800 rounded-lg cursor-pointer">
-                            <input type="checkbox" class="diaria-player-cb w-4 h-4 text-blue-600 bg-slate-950 border-slate-700 rounded" value='${JSON.stringify({id: p.id, name: p.name, email: p.email})}'>
-                            <span class="text-sm font-bold text-white">${p.name} <span class="text-xs text-slate-500 font-normal">(${p.email || 'Sem e-mail'})</span></span>
-                        </label>
-                    `;
-                });
+                const mdInput = document.getElementById('payMonthlyDay');
+                if (mdInput) mdInput.value = currentMonthlyDay || '';
+
+                const cvCheck = document.getElementById('caixaVisibility');
+                if (cvCheck) cvCheck.checked = currentCaixaVisibility;
+
+                // Popula lista de jogadores para diária
+                const list = document.getElementById('diariaPlayersList');
+                if (list) {
+                    list.innerHTML = '';
+                    state.players.forEach(p => {
+                        list.innerHTML += `
+                            <label class="flex items-center gap-3 p-2 hover:bg-slate-800 rounded-lg cursor-pointer">
+                                <input type="checkbox" class="diaria-player-cb w-4 h-4 text-purple-500 bg-slate-950 border-slate-700 rounded" value='${JSON.stringify({id: p.id, name: p.name, email: p.email})}'>
+                                <span class="text-sm font-bold text-white">${p.name} <span class="text-xs text-slate-500 font-normal">(${p.email || 'Sem e-mail'})</span></span>
+                            </label>
+                        `;
+                    });
+                }
             }
-        }
         }
     } catch (err) {
-        console.error("Erro ao carregar paymentSettings:", err);
+        console.error('Erro ao carregar paymentSettings:', err);
     }
 
-    const adminTable = document.getElementById('adminPaymentsTable');
+    const adminMonthlyTable = document.getElementById('adminMonthlyTable');
+    const adminDailyTable = document.getElementById('adminPaymentsTable');
     const userList = document.getElementById('userPendingChargesList');
 
-    if (currentPaymentMode === 'monthly') {
-        // MODO MENSALISTA
-        renderMonthlyView(isAdmin, monthlyDay, adminTable, userList);
-    } else if (currentPaymentMode === 'daily') {
-        // MODO DIARIA
-        renderDailyView(isAdmin, adminTable, userList);
-    } else {
-        // FREE MODE
-        if (adminTable) adminTable.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-slate-400">Modo Gratuito Ativo. Nenhuma cobrança.</td></tr>';
-        if (userList) userList.innerHTML = '<div class="text-center text-slate-400 py-8 text-sm italic">O grupo está no modo gratuito. 🎉</div>';
-    }
+    // Renderiza relatório de mensalistas (sempre visível na aba monthly)
+    renderMonthlyView(isAdmin, currentMonthlyDay, adminMonthlyTable, userList);
+
+    // Renderiza relatório de diaristas (realtime na aba daily)
+    renderDailyView(isAdmin, adminDailyTable, userList);
 
     renderCaixaView(isAdmin, userList);
 };
 
 const renderMonthlyView = (isAdmin, monthlyDay, adminTable, userList) => {
     const now = new Date();
-    
+
     if (isAdmin && adminTable) {
         adminTable.innerHTML = '';
-        // Setup table headers for monthly
-        const thead = adminTable.closest('table').querySelector('thead tr');
-        thead.innerHTML = `
-            <th class="px-4 py-3">Jogador</th>
-            <th class="px-4 py-3 text-center">Vencimento Atual</th>
-            <th class="px-4 py-3 text-center">Status</th>
-            <th class="px-4 py-3 text-right">Ação</th>
-        `;
-
         state.players.forEach(p => {
             let nextDue = getNextDueDate(p.paidUntil, monthlyDay);
             let isOverdue = now > nextDue;
-            
             const statusColor = isOverdue ? 'text-red-500' : 'text-green-500';
             const statusText = isOverdue ? 'Atrasado' : 'Em dia';
-            
             adminTable.innerHTML += `
                 <tr>
                     <td class="px-4 py-3 font-bold text-white">${p.name}</td>
                     <td class="px-4 py-3 text-center text-slate-300">${nextDue.toLocaleDateString()}</td>
                     <td class="px-4 py-3 text-center font-bold ${statusColor}">${statusText}</td>
                     <td class="px-4 py-3 text-right">
-                        <button onclick="addMonthlyPayment('${p.id}', '${p.name.replace(/'/g, "\\'")}', -1)" class="bg-red-600 hover:bg-red-500 text-white px-2 py-1 rounded text-xs font-bold transition-colors mr-1">-1 Mês</button>
+                        <button onclick="addMonthlyPayment('${p.id}', '${p.name.replace(/'/g, "\\'")}',-1)" class="bg-red-600 hover:bg-red-500 text-white px-2 py-1 rounded text-xs font-bold transition-colors mr-1">-1 Mês</button>
                         <button onclick="addMonthlyPayment('${p.id}', '${p.name.replace(/'/g, "\\'")}', 1)" class="bg-blue-600 hover:bg-blue-500 text-white px-2 py-1 rounded text-xs font-bold transition-colors">+1 Mês</button>
                     </td>
                 </tr>
@@ -415,34 +365,65 @@ window.showPaymentSaveBtn = () => {
     if (btn) btn.classList.remove('hidden');
 };
 
-export const savePaymentSettings = async () => {
+window.showMensalistaSaveBtn = () => {
+    const btn = document.getElementById('btnSaveMensalista');
+    if (btn) btn.classList.remove('hidden');
+};
+
+// Salva apenas a chave PIX
+window.savePixKeyOnly = async () => {
     if (!state.currentGroupId) return;
-
-    const mode = document.querySelector('input[name="paymentMode"]:checked')?.value || 'free';
-    const monthlyValue = parseFloat(document.getElementById('payMonthlyValue').value) || 0;
-    const monthlyDay = parseInt(document.getElementById('payMonthlyDay').value) || 1;
     const pixKey = document.getElementById('adminPixKey').value.trim();
-
-    const payload = { mode, monthlyValue, monthlyDay, pixKey };
-
     try {
-        await setDoc(doc(db, 'groups', state.currentGroupId, 'paymentSettings', 'global'), payload, { merge: true });
-        showToast("Configurações de pagamento salvas!", "success");
-        
+        await setDoc(doc(db, 'groups', state.currentGroupId, 'paymentSettings', 'global'), { pixKey }, { merge: true });
+        showToast('Chave PIX salva!', 'success');
         const btn = document.getElementById('btnSaveConfig');
         if (btn) btn.classList.add('hidden');
-
-        currentPaymentMode = mode;
         currentPixKey = pixKey;
-        renderPaymentsView();
     } catch (e) {
         console.error(e);
-        showToast("Erro ao salvar no Firestore.", "error");
+        showToast('Erro ao salvar PIX.', 'error');
+    }
+};
+
+// Salva configurações de mensalidade
+window.saveMensalistaSettings = async () => {
+    if (!state.currentGroupId) return;
+    const monthlyValue = parseFloat(document.getElementById('payMonthlyValue').value) || 0;
+    const monthlyDay = parseInt(document.getElementById('payMonthlyDay').value) || 1;
+    try {
+        await setDoc(doc(db, 'groups', state.currentGroupId, 'paymentSettings', 'global'), { monthlyValue, monthlyDay }, { merge: true });
+        showToast('Configurações de mensalidade salvas!', 'success');
+        const btn = document.getElementById('btnSaveMensalista');
+        if (btn) btn.classList.add('hidden');
+        currentMonthlyValue = monthlyValue;
+        currentMonthlyDay = monthlyDay;
+        // Atualiza tabela de mensalistas
+        const adminMonthlyTable = document.getElementById('adminMonthlyTable');
+        renderMonthlyView(true, currentMonthlyDay, adminMonthlyTable, null);
+    } catch (e) {
+        console.error(e);
+        showToast('Erro ao salvar mensalidade.', 'error');
+    }
+};
+
+export const savePaymentSettings = async () => {
+    if (!state.currentGroupId) return;
+    const pixKey = document.getElementById('adminPixKey')?.value.trim() || '';
+    const monthlyValue = parseFloat(document.getElementById('payMonthlyValue')?.value) || 0;
+    const monthlyDay = parseInt(document.getElementById('payMonthlyDay')?.value) || 1;
+    const payload = { pixKey, monthlyValue, monthlyDay };
+    try {
+        await setDoc(doc(db, 'groups', state.currentGroupId, 'paymentSettings', 'global'), payload, { merge: true });
+        currentPixKey = pixKey;
+        currentMonthlyValue = monthlyValue;
+        currentMonthlyDay = monthlyDay;
+    } catch (e) {
+        console.error(e);
     }
 };
 
 export const generateDailyCharges = async () => {
-    await savePaymentSettings();
 
     const desc = document.getElementById('diariaDesc').value.trim();
     const val = parseFloat(document.getElementById('diariaValue').value);
@@ -499,7 +480,7 @@ export const generateDailyCharges = async () => {
         document.getElementById('diariaDesc').value = '';
         document.getElementById('diariaValue').value = '';
         document.querySelectorAll('.diaria-player-cb').forEach(cb => cb.checked = false);
-        setPaymentAdminTab('status');
+        setPaymentAdminTab('daily');
     } catch (e) {
         console.error(e);
         showToast("Erro ao criar cobranças.", "error");

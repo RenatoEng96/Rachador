@@ -794,100 +794,146 @@
                             <h3 class="text-lg font-black text-white uppercase flex items-center gap-2">
                                 <i data-lucide="settings" class="text-blue-500"></i> Administração
                             </h3>
-                            <div class="flex gap-2">
+                            <div class="flex flex-wrap gap-2">
                                 <button onclick="setPaymentAdminTab('config')" id="tab-pay-config" class="px-4 py-2 rounded-lg text-xs font-bold transition-all bg-blue-600 text-white">Configurações</button>
-                                <button onclick="setPaymentAdminTab('status')" id="tab-pay-status" class="px-4 py-2 rounded-lg text-xs font-bold transition-all bg-slate-700 text-slate-300 hover:text-white">Relatório</button>
+                                <button onclick="setPaymentAdminTab('monthly')" id="tab-pay-monthly" class="px-4 py-2 rounded-lg text-xs font-bold transition-all bg-slate-700 text-slate-300 hover:text-white">Mensalistas</button>
+                                <button onclick="setPaymentAdminTab('daily')" id="tab-pay-daily" class="px-4 py-2 rounded-lg text-xs font-bold transition-all bg-slate-700 text-slate-300 hover:text-white">Diária</button>
                                 <button onclick="setPaymentAdminTab('caixa')" id="tab-pay-caixa" class="px-4 py-2 rounded-lg text-xs font-bold transition-all bg-slate-700 text-slate-300 hover:text-white">Caixa</button>
                             </div>
                         </div>
 
                         <!-- TAB: CONFIG -->
-                        <div id="pay-admin-config" class="p-4 sm:p-6 space-y-6">
-                            <!-- Chave PIX (Admin) e Salvar -->
-                            <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700">
-                                <div class="w-full mb-4">
-                                    <h4 class="text-sm font-bold text-white mb-2 uppercase">Conta de Recebimento (PIX)</h4>
-                                    <p class="text-xs text-slate-400 mb-2">Insira sua chave PIX para que os jogadores possam copiar e realizar o pagamento.</p>
-                                    <input type="text" id="adminPixKey" oninput="if(typeof showPaymentSaveBtn === 'function') showPaymentSaveBtn()" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white text-sm" placeholder="Ex: 11999999999 ou email@email.com">
+                        <div id="pay-admin-config" class="p-4 sm:p-6 space-y-4">
+                            <!-- Apenas Chave PIX -->
+                            <div class="bg-slate-900/50 p-5 rounded-xl border border-slate-700">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <div class="bg-green-500/10 p-2 rounded-lg border border-green-500/20">
+                                        <i data-lucide="qr-code" class="w-5 h-5 text-green-400"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-white uppercase">Conta de Recebimento (PIX)</h4>
+                                        <p class="text-xs text-slate-400">Insira sua chave PIX para que os jogadores possam copiar e realizar o pagamento.</p>
+                                    </div>
                                 </div>
-                                <button id="btnSaveConfig" onclick="savePaymentSettings()" class="hidden bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-6 rounded-lg text-sm w-full sm:w-auto shadow-md transition-all">Salvar Configurações</button>
+                                <input type="text" id="adminPixKey" oninput="if(typeof showPaymentSaveBtn === 'function') showPaymentSaveBtn()" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-white text-sm focus:border-green-500 outline-none transition-colors" placeholder="Ex: 11999999999 ou email@email.com">
+                                <button id="btnSaveConfig" onclick="savePixKeyOnly()" class="hidden mt-3 bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-6 rounded-lg text-sm w-full shadow-md transition-all flex items-center justify-center gap-2">
+                                    <i data-lucide="save" class="w-4 h-4"></i> Salvar Chave PIX
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- TAB: MENSALISTAS -->
+                        <div id="pay-admin-monthly" class="p-4 sm:p-6 space-y-6 hidden">
+                            <!-- Config Mensalidade -->
+                            <div class="bg-slate-900/50 p-5 rounded-xl border border-slate-700">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <div class="bg-blue-500/10 p-2 rounded-lg border border-blue-500/20">
+                                        <i data-lucide="calendar" class="w-5 h-5 text-blue-400"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-white uppercase">Configurações da Mensalidade</h4>
+                                        <p class="text-xs text-slate-400">Defina o valor e a data de vencimento mensal.</p>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="text-xs text-slate-400 font-bold block mb-1 uppercase">Valor da Mensalidade (R$)</label>
+                                        <input type="number" id="payMonthlyValue" oninput="showMensalistaSaveBtn()" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white focus:border-blue-500 outline-none transition-colors" placeholder="Ex: 50.00">
+                                    </div>
+                                    <div>
+                                        <label class="text-xs text-slate-400 font-bold block mb-1 uppercase">Dia do Vencimento</label>
+                                        <input type="number" id="payMonthlyDay" oninput="showMensalistaSaveBtn()" min="1" max="31" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white focus:border-blue-500 outline-none transition-colors" placeholder="Ex: 5">
+                                    </div>
+                                </div>
+                                <button id="btnSaveMensalista" onclick="saveMensalistaSettings()" class="hidden mt-4 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-6 rounded-lg text-sm shadow-md transition-all flex items-center gap-2">
+                                    <i data-lucide="save" class="w-4 h-4"></i> Salvar Mensalidade
+                                </button>
                             </div>
 
-                            <!-- Modo de Pagamento -->
-                            <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700">
-                                <h4 class="text-sm font-bold text-white mb-4 uppercase">Modalidade do Grupo</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-                                    <label class="flex items-center gap-2 p-3 bg-slate-800 rounded-lg border border-slate-600 cursor-pointer hover:bg-slate-700">
-                                        <input type="radio" name="paymentMode" value="free" class="text-blue-500" onchange="if(typeof showPaymentSaveBtn === 'function') showPaymentSaveBtn()">
-                                        <span class="text-sm font-bold text-white">Gratuito</span>
-                                    </label>
-                                    <label class="flex items-center gap-2 p-3 bg-slate-800 rounded-lg border border-slate-600 cursor-pointer hover:bg-slate-700">
-                                        <input type="radio" name="paymentMode" value="monthly" class="text-blue-500" onchange="if(typeof showPaymentSaveBtn === 'function') showPaymentSaveBtn()">
-                                        <span class="text-sm font-bold text-white">Mensalidade</span>
-                                    </label>
-                                    <label class="flex items-center gap-2 p-3 bg-slate-800 rounded-lg border border-slate-600 cursor-pointer hover:bg-slate-700">
-                                        <input type="radio" name="paymentMode" value="daily" class="text-blue-500" onchange="if(typeof showPaymentSaveBtn === 'function') showPaymentSaveBtn()">
-                                        <span class="text-sm font-bold text-white">Diária / Avulso</span>
-                                    </label>
+                            <!-- Relatório dos Mensalistas -->
+                            <div class="bg-slate-900/50 rounded-xl border border-slate-700 overflow-hidden">
+                                <div class="px-5 py-3 border-b border-slate-700 flex items-center gap-2">
+                                    <i data-lucide="bar-chart-2" class="w-4 h-4 text-blue-400"></i>
+                                    <h4 class="text-sm font-bold text-white uppercase">Relatório de Mensalistas</h4>
                                 </div>
-                                <div id="monthlySettings" class="hidden flex flex-col gap-3 mt-4 border-t border-slate-700 pt-4">
-                                    <div>
-                                        <label class="text-xs text-slate-400 font-bold block mb-1">Valor da Mensalidade (R$)</label>
-                                        <input type="number" id="payMonthlyValue" oninput="if(typeof showPaymentSaveBtn === 'function') showPaymentSaveBtn()" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white" placeholder="Ex: 50.00">
-                                    </div>
-                                    <div>
-                                        <label class="text-xs text-slate-400 font-bold block mb-1">Dia do Vencimento</label>
-                                        <input type="number" id="payMonthlyDay" oninput="if(typeof showPaymentSaveBtn === 'function') showPaymentSaveBtn()" min="1" max="31" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white" placeholder="Ex: 5">
-                                    </div>
-                                </div>
-                                <div id="dailySettings" class="hidden flex-col gap-4 mt-4 border-t border-slate-700 pt-4">
-                                    <h4 class="text-sm font-bold text-white uppercase">Lançar Cobrança Diária</h4>
-                                    <div class="flex flex-col sm:flex-row gap-4 mb-4">
-                                        <div class="flex-1">
-                                            <label class="text-xs text-slate-400 font-bold block mb-1">Descrição</label>
-                                            <input type="text" id="diariaDesc" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white text-sm" placeholder="Ex: Racha 05/10">
-                                        </div>
-                                        <div class="flex-1">
-                                            <label class="text-xs text-slate-400 font-bold block mb-1">Valor (R$)</label>
-                                            <input type="number" id="diariaValue" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white text-sm" placeholder="0.00">
-                                        </div>
-                                        <div class="flex-1">
-                                            <label class="text-xs text-slate-400 font-bold block mb-1">Tipo de Rateio</label>
-                                            <select id="diariaType" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white text-sm">
-                                                <option value="fixed">Valor fixo por jogador</option>
-                                                <option value="split">Dividir valor total</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="bg-slate-900 border border-slate-700 rounded-xl p-4 max-h-60 overflow-y-auto" id="diariaPlayersList">
-                                        <!-- Preenchido dinamicamente com os jogadores do grupo -->
-                                    </div>
-                                    
-                                    <button onclick="generateDailyCharges()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl shadow-lg mt-2 flex justify-center items-center gap-2">
-                                        <i data-lucide="send" class="w-4 h-4"></i> ENVIAR COBRANÇAS
-                                    </button>
+                                <div class="overflow-x-auto w-full max-h-[450px] overflow-y-auto">
+                                    <table class="w-full text-left min-w-[400px]">
+                                        <thead class="bg-slate-900/90 text-slate-400 text-xs sm:text-sm sticky top-0 z-10">
+                                            <tr>
+                                                <th class="px-4 py-3">Jogador</th>
+                                                <th class="px-4 py-3 text-center">Próx. Vencimento</th>
+                                                <th class="px-4 py-3 text-center">Status</th>
+                                                <th class="px-4 py-3 text-right">Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="adminMonthlyTable" class="divide-y divide-slate-700 text-xs sm:text-sm bg-slate-800">
+                                            <!-- Preenchido dinamicamente -->
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- TAB: STATUS -->
-                        <div id="pay-admin-status" class="p-0 hidden">
-                            <div class="overflow-x-auto w-full max-h-[500px] overflow-y-auto">
-                                <table class="w-full text-left min-w-[500px]">
-                                    <thead class="bg-slate-900/90 text-slate-400 text-xs sm:text-sm sticky top-0 z-10">
-                                        <tr>
-                                            <th class="px-4 py-3">Jogador</th>
-                                            <th class="px-4 py-3">Descrição</th>
-                                            <th class="px-4 py-3">Valor</th>
-                                            <th class="px-4 py-3">Status</th>
-                                            <th class="px-4 py-3 text-right">Criado em</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="adminPaymentsTable" class="divide-y divide-slate-700 text-xs sm:text-sm bg-slate-800">
-                                        <!-- Preenchido dinamicamente -->
-                                    </tbody>
-                                </table>
+                        <!-- TAB: DIÁRIA -->
+                        <div id="pay-admin-daily" class="p-4 sm:p-6 space-y-6 hidden">
+                            <!-- Lançador de Cobrança Diária -->
+                            <div class="bg-slate-900/50 p-5 rounded-xl border border-slate-700">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <div class="bg-purple-500/10 p-2 rounded-lg border border-purple-500/20">
+                                        <i data-lucide="send" class="w-5 h-5 text-purple-400"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-white uppercase">Lançar Cobrança Diária</h4>
+                                        <p class="text-xs text-slate-400">Selecione os jogadores e defina o valor da cobrança.</p>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col sm:flex-row gap-3 mb-4">
+                                    <div class="flex-[2]">
+                                        <label class="text-xs text-slate-400 font-bold block mb-1 uppercase">Descrição</label>
+                                        <input type="text" id="diariaDesc" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white text-sm focus:border-purple-500 outline-none transition-colors" placeholder="Ex: Racha 05/10">
+                                    </div>
+                                    <div class="flex-1">
+                                        <label class="text-xs text-slate-400 font-bold block mb-1 uppercase">Valor (R$)</label>
+                                        <input type="number" id="diariaValue" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white text-sm focus:border-purple-500 outline-none transition-colors" placeholder="0.00">
+                                    </div>
+                                    <div class="flex-1">
+                                        <label class="text-xs text-slate-400 font-bold block mb-1 uppercase">Tipo de Rateio</label>
+                                        <select id="diariaType" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white text-sm focus:border-purple-500 outline-none transition-colors">
+                                            <option value="fixed">Fixo por jogador</option>
+                                            <option value="split">Dividir total</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="bg-slate-950 border border-slate-700 rounded-xl p-4 max-h-52 overflow-y-auto mb-4" id="diariaPlayersList">
+                                    <!-- Preenchido dinamicamente -->
+                                </div>
+                                <button onclick="generateDailyCharges()" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 rounded-xl shadow-lg flex justify-center items-center gap-2 transition-colors">
+                                    <i data-lucide="send" class="w-4 h-4"></i> ENVIAR COBRANÇAS
+                                </button>
+                            </div>
+
+                            <!-- Relatório dos Diaristas -->
+                            <div class="bg-slate-900/50 rounded-xl border border-slate-700 overflow-hidden">
+                                <div class="px-5 py-3 border-b border-slate-700 flex items-center gap-2">
+                                    <i data-lucide="bar-chart-2" class="w-4 h-4 text-purple-400"></i>
+                                    <h4 class="text-sm font-bold text-white uppercase">Relatório de Diaristas</h4>
+                                </div>
+                                <div class="overflow-x-auto w-full max-h-[450px] overflow-y-auto">
+                                    <table class="w-full text-left min-w-[500px]">
+                                        <thead class="bg-slate-900/90 text-slate-400 text-xs sm:text-sm sticky top-0 z-10">
+                                            <tr>
+                                                <th class="px-4 py-3">Jogador</th>
+                                                <th class="px-4 py-3">Descrição</th>
+                                                <th class="px-4 py-3">Valor</th>
+                                                <th class="px-4 py-3 text-center">Status</th>
+                                                <th class="px-4 py-3 text-right">Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="adminPaymentsTable" class="divide-y divide-slate-700 text-xs sm:text-sm bg-slate-800">
+                                            <!-- Preenchido dinamicamente -->
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
 
