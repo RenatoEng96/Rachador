@@ -773,6 +773,30 @@
                             <i data-lucide="piggy-bank" class="text-green-500 w-5 h-5"></i> Extrato do Caixa
                         </h3>
                     </div>
+                    <!-- Filtros do Extrato -->
+                    <div class="bg-slate-900/40 p-3 border-b border-slate-700/50 flex flex-col sm:flex-row gap-2 justify-between items-center">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase">Filtrar por Período:</span>
+                        <div class="flex gap-1.5 w-full sm:w-auto">
+                            <select id="playerFilterMonth" onchange="applyPlayerCaixaFilters()" class="bg-slate-950 border border-slate-700 rounded-lg p-1.5 text-white text-[10px] flex-1 sm:flex-none">
+                                <option value="all">Todos os Meses</option>
+                                <option value="0">Janeiro</option>
+                                <option value="1">Fevereiro</option>
+                                <option value="2">Março</option>
+                                <option value="3">Abril</option>
+                                <option value="4">Maio</option>
+                                <option value="5">Junho</option>
+                                <option value="6">Julho</option>
+                                <option value="7">Agosto</option>
+                                <option value="8">Setembro</option>
+                                <option value="9">Outubro</option>
+                                <option value="10">Novembro</option>
+                                <option value="11">Dezembro</option>
+                            </select>
+                            <select id="playerFilterYear" onchange="applyPlayerCaixaFilters()" class="bg-slate-950 border border-slate-700 rounded-lg p-1.5 text-white text-[10px] flex-1 sm:flex-none">
+                                <option value="all">Todos os Anos</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="p-0 overflow-y-auto flex-1">
                         <table class="w-full text-left table-auto">
                             <thead class="bg-slate-900/90 text-slate-400 text-[10px] sm:text-xs sticky top-0 z-10">
@@ -787,6 +811,8 @@
                             </tbody>
                         </table>
                     </div>
+                    <!-- Player Caixa Pagination Container -->
+                    <div id="playerCaixaPagination" class="flex justify-center items-center gap-1.5 py-3 border-t border-slate-700/50 bg-slate-900/30"></div>
                 </div>
                 <div class="lg:col-span-2 flex flex-col gap-6 admin-only-section hidden">
                     <div class="bg-slate-800/80 rounded-3xl border border-slate-700/50 shadow-xl overflow-hidden">
@@ -965,6 +991,33 @@
                                 </div>
                             </div>
 
+                            <!-- Filtros de Caixa -->
+                            <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700 flex flex-col sm:flex-row gap-3 justify-between items-center">
+                                <h4 class="text-sm font-bold text-white uppercase flex items-center gap-2">
+                                    <i data-lucide="filter" class="w-4 h-4 text-blue-400"></i> Filtrar Lançamentos
+                                </h4>
+                                <div class="flex gap-2 w-full sm:w-auto">
+                                    <select id="caixaFilterMonth" onchange="applyCaixaFilters()" class="bg-slate-950 border border-slate-700 rounded-lg p-2 text-white text-xs flex-1 sm:flex-none">
+                                        <option value="all">Todos os Meses</option>
+                                        <option value="0">Janeiro</option>
+                                        <option value="1">Fevereiro</option>
+                                        <option value="2">Março</option>
+                                        <option value="3">Abril</option>
+                                        <option value="4">Maio</option>
+                                        <option value="5">Junho</option>
+                                        <option value="6">Julho</option>
+                                        <option value="7">Agosto</option>
+                                        <option value="8">Setembro</option>
+                                        <option value="9">Outubro</option>
+                                        <option value="10">Novembro</option>
+                                        <option value="11">Dezembro</option>
+                                    </select>
+                                    <select id="caixaFilterYear" onchange="applyCaixaFilters()" class="bg-slate-950 border border-slate-700 rounded-lg p-2 text-white text-xs flex-1 sm:flex-none">
+                                        <option value="all">Todos os Anos</option>
+                                    </select>
+                                </div>
+                            </div>
+
                             <!-- History Table -->
                             <div class="overflow-x-auto w-full max-h-[400px] overflow-y-auto rounded-xl border border-slate-700">
                                 <table class="w-full text-left table-auto">
@@ -981,6 +1034,9 @@
                                     </tbody>
                                 </table>
                             </div>
+                            
+                            <!-- Caixa Pagination Container -->
+                            <div id="caixaPagination" class="flex justify-center items-center gap-2 pt-2"></div>
                         </div>
                     </div>
                 </div>

@@ -10,6 +10,15 @@ let currentMonthlyDay = 10;
 let currentCaixaVisibility = false;
 let currentCaixaBalance = 0;
 
+// Filtros e Paginação de Caixa/Extrato
+let cachedEntries = [];
+let adminCaixaCurrentPage = 1;
+let playerCaixaCurrentPage = 1;
+let adminCaixaSelectedMonth = 'all';
+let adminCaixaSelectedYear = 'all';
+let playerCaixaSelectedMonth = 'all';
+let playerCaixaSelectedYear = 'all';
+
 export const setPaymentAdminTab = (tab) => {
     ['config', 'monthly', 'daily', 'caixa'].forEach(t => {
         const el = document.getElementById(`pay-admin-${t}`);
@@ -533,95 +542,250 @@ export const generateDailyCharges = async () => {
 function renderCaixaView(isAdmin, userList) {
     if (unsubscribeCaixa) unsubscribeCaixa();
     
+    // Reset filters and page when changing view / group
+    adminCaixaCurrentPage = 1;
+    playerCaixaCurrentPage = 1;
+    adminCaixaSelectedMonth = 'all';
+    adminCaixaSelectedYear = 'all';
+    playerCaixaSelectedMonth = 'all';
+    playerCaixaSelectedYear = 'all';
+    
+    const filterMonthEl = document.getElementById('caixaFilterMonth');
+    if (filterMonthEl) filterMonthEl.value = 'all';
+    const filterYearEl = document.getElementById('caixaFilterYear');
+    if (filterYearEl) filterYearEl.value = 'all';
+    const pFilterMonthEl = document.getElementById('playerFilterMonth');
+    if (pFilterMonthEl) pFilterMonthEl.value = 'all';
+    const pFilterYearEl = document.getElementById('playerFilterYear');
+    if (pFilterYearEl) pFilterYearEl.value = 'all';
+
     const caixaQuery = collection(db, 'groups', state.currentGroupId, 'caixa');
     
     unsubscribeCaixa = onSnapshot(caixaQuery, (snapshot) => {
         const entries = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
         // Ordenar por data mais recente
         entries.sort((a, b) => b.createdAt - a.createdAt);
+        cachedEntries = entries;
+
+        // Popular os seletores de anos dinamicamente
+        updateYearSelectors(entries);
+
+        // Renderiza tudo (caixa do admin e extrato do jogador)
+        renderCaixaTables(isAdmin);
+    });
+}
+
+function updateYearSelectors(entries) {
+    const years = new Set();
+    years.add(new Date().getFullYear()); // Sempre inclui o ano atual
+    entries.forEach(entry => {
+        if (entry.createdAt) {
+            const y = new Date(entry.createdAt).getFullYear();
+            years.add(y);
+        }
+    });
+    const sortedYears = Array.from(years).sort((a, b) => b - a);
+
+    const populateSelect = (selectId, currentValue) => {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+        select.innerHTML = '<option value="all">Todos os Anos</option>';
+        sortedYears.forEach(y => {
+            select.innerHTML += `<option value="${y}">${y}</option>`;
+        });
+        select.value = currentValue;
+    };
+
+    populateSelect('caixaFilterYear', adminCaixaSelectedYear);
+    populateSelect('playerFilterYear', playerCaixaSelectedYear);
+}
+
+function renderCaixaTables(isAdmin) {
+    // 1. Filtragem das entradas
+    const filteredAdminEntries = cachedEntries.filter(entry => {
+        if (!entry.createdAt) return false;
+        const date = new Date(entry.createdAt);
+        const m = date.getMonth().toString();
+        const y = date.getFullYear().toString();
         
-        let total = 0;
-        const tbody = document.getElementById('caixaTableBody');
-        if (isAdmin && tbody) {
-            tbody.innerHTML = '';
-        }
+        const matchesMonth = adminCaixaSelectedMonth === 'all' || m === adminCaixaSelectedMonth;
+        const matchesYear = adminCaixaSelectedYear === 'all' || y === adminCaixaSelectedYear;
+        return matchesMonth && matchesYear;
+    });
 
-        const tbodyPlayer = document.getElementById('playerCaixaTableBody');
-        if (tbodyPlayer) {
-            tbodyPlayer.innerHTML = '';
-        }
+    const filteredPlayerEntries = cachedEntries.filter(entry => {
+        if (!entry.createdAt) return false;
+        const date = new Date(entry.createdAt);
+        const m = date.getMonth().toString();
+        const y = date.getFullYear().toString();
+        
+        const matchesMonth = playerCaixaSelectedMonth === 'all' || m === playerCaixaSelectedMonth;
+        const matchesYear = playerCaixaSelectedYear === 'all' || y === playerCaixaSelectedYear;
+        return matchesMonth && matchesYear;
+    });
 
-        entries.forEach(entry => {
+    // 2. Cálculo do Saldo Total com base em TODAS as transações
+    let total = 0;
+    cachedEntries.forEach(entry => {
+        const isCredit = entry.type === 'credit';
+        const value = parseFloat(entry.value) || 0;
+        total += isCredit ? value : -value;
+    });
+
+    // 3. Renderizar a tabela do Admin
+    const tbody = document.getElementById('caixaTableBody');
+    if (isAdmin && tbody) {
+        tbody.innerHTML = '';
+        
+        // Paginação do Admin
+        const totalItems = filteredAdminEntries.length;
+        const totalPages = Math.ceil(totalItems / 30);
+        if (adminCaixaCurrentPage > totalPages) adminCaixaCurrentPage = Math.max(1, totalPages);
+        
+        const start = (adminCaixaCurrentPage - 1) * 30;
+        const end = start + 30;
+        const pagedEntries = filteredAdminEntries.slice(start, end);
+
+        pagedEntries.forEach(entry => {
             const isCredit = entry.type === 'credit';
             const value = parseFloat(entry.value) || 0;
-            total += isCredit ? value : -value;
-
             const dateStr = new Date(entry.createdAt).toLocaleDateString();
             const color = isCredit ? 'text-green-500' : 'text-red-500';
             const sign = isCredit ? '+' : '-';
-
-            if (isAdmin && tbody) {
-                const typeText = isCredit ? 'Crédito' : 'Débito';
-                tbody.innerHTML += `
-                    <tr>
-                        <td class="px-2 py-2 sm:px-4 sm:py-3 text-slate-300">${dateStr}</td>
-                        <td class="px-2 py-2 sm:px-4 sm:py-3 text-white font-bold break-words">${entry.description}</td>
-                        <td class="px-2 py-2 sm:px-4 sm:py-3 ${color} font-bold">${typeText}</td>
-                        <td class="px-2 py-2 sm:px-4 sm:py-3 text-right ${color} font-bold whitespace-nowrap">${sign} R$ ${value.toFixed(2)}</td>
-                    </tr>
-                `;
-            }
-
-            if (tbodyPlayer) {
-                tbodyPlayer.innerHTML += `
-                    <tr>
-                        <td class="px-2 py-2 sm:px-3 sm:py-2 text-slate-300">${dateStr}</td>
-                        <td class="px-2 py-2 sm:px-3 sm:py-2 text-white font-bold text-xs break-words">${entry.description}</td>
-                        <td class="px-2 py-2 sm:px-3 sm:py-2 text-right ${color} font-bold whitespace-nowrap">${sign} R$ ${value.toFixed(2)}</td>
-                    </tr>
-                `;
-            }
+            const typeText = isCredit ? 'Crédito' : 'Débito';
+            
+            tbody.innerHTML += `
+                <tr>
+                    <td class="px-2 py-2 sm:px-4 sm:py-3 text-slate-300">${dateStr}</td>
+                    <td class="px-2 py-2 sm:px-4 sm:py-3 text-white font-bold break-words">${entry.description}</td>
+                    <td class="px-2 py-2 sm:px-4 sm:py-3 ${color} font-bold">${typeText}</td>
+                    <td class="px-2 py-2 sm:px-4 sm:py-3 text-right ${color} font-bold whitespace-nowrap">${sign} R$ ${value.toFixed(2)}</td>
+                </tr>
+            `;
         });
-        
-        currentCaixaBalance = total;
-        
-        const balanceEl = document.getElementById('caixaBalance');
-        if (balanceEl) {
-            balanceEl.textContent = `R$ ${total.toFixed(2)}`;
-            balanceEl.className = `text-2xl font-black ${total >= 0 ? 'text-green-400' : 'text-red-400'}`;
-        }
 
-        const playerCaixaView = document.getElementById('playerCaixaView');
-        const playerCaixaExtratoPanel = document.getElementById('playerCaixaExtratoPanel');
-        
-        const isRegularPlayer = !(state.currentUserRole === 'admin' || state.isMaster);
-        const shouldShowExtrato = isRegularPlayer && currentCaixaVisibility;
-        const shouldShowBalance = currentCaixaVisibility || isAdmin;
+        renderPagination('caixaPagination', adminCaixaCurrentPage, totalPages, 'changeAdminCaixaPage');
+    }
 
-        if (playerCaixaView) {
-            if (shouldShowBalance) {
-                playerCaixaView.classList.remove('hidden');
-                const playerBalance = document.getElementById('playerCaixaBalance');
-                if (playerBalance) {
-                    playerBalance.textContent = `R$ ${total.toFixed(2)}`;
-                    playerBalance.className = `text-sm font-black ${total >= 0 ? 'text-green-400' : 'text-red-400'}`;
-                }
-            } else {
-                playerCaixaView.classList.add('hidden');
+    // 4. Renderizar a tabela do Player (Extrato)
+    const tbodyPlayer = document.getElementById('playerCaixaTableBody');
+    if (tbodyPlayer) {
+        tbodyPlayer.innerHTML = '';
+        
+        // Paginação do Player
+        const totalItems = filteredPlayerEntries.length;
+        const totalPages = Math.ceil(totalItems / 30);
+        if (playerCaixaCurrentPage > totalPages) playerCaixaCurrentPage = Math.max(1, totalPages);
+        
+        const start = (playerCaixaCurrentPage - 1) * 30;
+        const end = start + 30;
+        const pagedEntries = filteredPlayerEntries.slice(start, end);
+
+        pagedEntries.forEach(entry => {
+            const isCredit = entry.type === 'credit';
+            const value = parseFloat(entry.value) || 0;
+            const dateStr = new Date(entry.createdAt).toLocaleDateString();
+            const color = isCredit ? 'text-green-500' : 'text-red-500';
+            const sign = isCredit ? '+' : '-';
+            
+            tbodyPlayer.innerHTML += `
+                <tr>
+                    <td class="px-2 py-2 sm:px-3 sm:py-2 text-slate-300">${dateStr}</td>
+                    <td class="px-2 py-2 sm:px-3 sm:py-2 text-white font-bold text-xs break-words">${entry.description}</td>
+                    <td class="px-2 py-2 sm:px-3 sm:py-2 text-right ${color} font-bold whitespace-nowrap">${sign} R$ ${value.toFixed(2)}</td>
+                </tr>
+            `;
+        });
+
+        renderPagination('playerCaixaPagination', playerCaixaCurrentPage, totalPages, 'changePlayerCaixaPage');
+    }
+
+    // 5. Atualizar Saldos e Visibilidades
+    currentCaixaBalance = total;
+    
+    const balanceEl = document.getElementById('caixaBalance');
+    if (balanceEl) {
+        balanceEl.textContent = `R$ ${total.toFixed(2)}`;
+        balanceEl.className = `text-2xl font-black ${total >= 0 ? 'text-green-400' : 'text-red-400'}`;
+    }
+
+    const playerCaixaView = document.getElementById('playerCaixaView');
+    const playerCaixaExtratoPanel = document.getElementById('playerCaixaExtratoPanel');
+    
+    const isRegularPlayer = !(state.currentUserRole === 'admin' || state.isMaster);
+    const shouldShowExtrato = isRegularPlayer && currentCaixaVisibility;
+    const shouldShowBalance = currentCaixaVisibility || isAdmin;
+
+    if (playerCaixaView) {
+        if (shouldShowBalance) {
+            playerCaixaView.classList.remove('hidden');
+            const playerBalance = document.getElementById('playerCaixaBalance');
+            if (playerBalance) {
+                playerBalance.textContent = `R$ ${total.toFixed(2)}`;
+                playerBalance.className = `text-sm font-black ${total >= 0 ? 'text-green-400' : 'text-red-400'}`;
             }
+        } else {
+            playerCaixaView.classList.add('hidden');
         }
+    }
 
-        if (playerCaixaExtratoPanel) {
-            if (shouldShowExtrato) {
-                playerCaixaExtratoPanel.classList.remove('hidden');
-                playerCaixaExtratoPanel.classList.add('flex');
-            } else {
-                playerCaixaExtratoPanel.classList.add('hidden');
-                playerCaixaExtratoPanel.classList.remove('flex');
-            }
+    if (playerCaixaExtratoPanel) {
+        if (shouldShowExtrato) {
+            playerCaixaExtratoPanel.classList.remove('hidden');
+            playerCaixaExtratoPanel.classList.add('flex');
+        } else {
+            playerCaixaExtratoPanel.classList.add('hidden');
+            playerCaixaExtratoPanel.classList.remove('flex');
         }
-    });
-};
+    }
+    
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function renderPagination(containerId, currentPage, totalPages, callbackName) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+    
+    if (totalPages <= 1) {
+        container.classList.add('hidden');
+        container.classList.remove('flex');
+        return;
+    }
+    container.classList.remove('hidden');
+    container.classList.add('flex');
+
+    // Botão de Anterior
+    const prevDisabled = currentPage === 1;
+    container.innerHTML += `
+        <button onclick="${prevDisabled ? '' : `${callbackName}(${currentPage - 1})`}" 
+            class="px-2 py-1 text-xs font-bold rounded transition-colors ${prevDisabled ? 'text-slate-600 bg-slate-800/30 cursor-not-allowed' : 'text-slate-300 bg-slate-800 hover:bg-slate-700 hover:text-white'}" 
+            ${prevDisabled ? 'disabled' : ''}>
+            &lt;
+        </button>
+    `;
+
+    // Botões Numerados
+    for (let i = 1; i <= totalPages; i++) {
+        const isActive = i === currentPage;
+        container.innerHTML += `
+            <button onclick="${callbackName}(${i})" 
+                class="px-3 py-1 text-xs font-black rounded transition-all ${isActive ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20 scale-105' : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white'}">
+                ${i}
+            </button>
+        `;
+    }
+
+    // Botão de Próximo
+    const nextDisabled = currentPage === totalPages;
+    container.innerHTML += `
+        <button onclick="${nextDisabled ? '' : `${callbackName}(${currentPage + 1})`}" 
+            class="px-2 py-1 text-xs font-bold rounded transition-colors ${nextDisabled ? 'text-slate-600 bg-slate-800/30 cursor-not-allowed' : 'text-slate-300 bg-slate-800 hover:bg-slate-700 hover:text-white'}" 
+            ${nextDisabled ? 'disabled' : ''}>
+            &gt;
+        </button>
+    `;
+}
 
 export const toggleCaixaVisibility = async (isVisible) => {
     if (!state.currentGroupId) return;
@@ -654,6 +818,37 @@ export const toggleCaixaVisibility = async (isVisible) => {
         console.error(e);
         showToast("Erro ao atualizar visibilidade.", "error");
     }
+};
+
+// Window-scoped callbacks
+window.changeAdminCaixaPage = (page) => {
+    adminCaixaCurrentPage = page;
+    renderCaixaTables(state.currentUserRole === 'admin' || state.isMaster);
+};
+
+window.changePlayerCaixaPage = (page) => {
+    playerCaixaCurrentPage = page;
+    renderCaixaTables(state.currentUserRole === 'admin' || state.isMaster);
+};
+
+window.applyCaixaFilters = () => {
+    const monthEl = document.getElementById('caixaFilterMonth');
+    const yearEl = document.getElementById('caixaFilterYear');
+    if (monthEl) adminCaixaSelectedMonth = monthEl.value;
+    if (yearEl) adminCaixaSelectedYear = yearEl.value;
+    
+    adminCaixaCurrentPage = 1; // Reset to page 1
+    renderCaixaTables(state.currentUserRole === 'admin' || state.isMaster);
+};
+
+window.applyPlayerCaixaFilters = () => {
+    const monthEl = document.getElementById('playerFilterMonth');
+    const yearEl = document.getElementById('playerFilterYear');
+    if (monthEl) playerCaixaSelectedMonth = monthEl.value;
+    if (yearEl) playerCaixaSelectedYear = yearEl.value;
+    
+    playerCaixaCurrentPage = 1; // Reset to page 1
+    renderCaixaTables(state.currentUserRole === 'admin' || state.isMaster);
 };
 
 export const addCaixaEntry = async () => {
