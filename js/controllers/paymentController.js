@@ -152,18 +152,38 @@ const renderMonthlyView = (isAdmin, monthlyDay, adminTable, userMonthlyEl) => {
     const statusText  = isOverdue ? 'Atrasado' : 'Em dia';
     const borderColor = isOverdue ? 'border-red-500/40' : 'border-slate-700';
 
-    userMonthlyEl.innerHTML = `
-        <div class="bg-slate-900 border ${borderColor} rounded-xl p-4 flex items-center justify-between gap-4">
-            <div class="flex items-center gap-3">
-                <div class="bg-blue-500/10 p-2 rounded-lg border border-blue-500/20 shrink-0">
-                    <i data-lucide="calendar" class="w-4 h-4 text-blue-400"></i>
-                </div>
-                <div>
-                    <p class="text-xs text-slate-400 font-bold uppercase">Mensalidade</p>
-                    <p class="text-sm text-slate-300">Venc: <span class="font-bold text-white">${nextDue.toLocaleDateString()}</span></p>
-                </div>
+    let overdueText = '';
+    if (isOverdue && currentMonthlyValue > 0) {
+        let overdueMonths = 0;
+        let tempDate = new Date(nextDue.getTime());
+        while (now > tempDate) {
+            overdueMonths++;
+            tempDate.setMonth(tempDate.getMonth() + 1);
+        }
+        const totalOverdue = overdueMonths * currentMonthlyValue;
+        overdueText = `
+            <div class="mt-2 pt-2 border-t border-slate-800 flex justify-between items-center text-xs font-bold text-red-400">
+                <span>Total em atraso (${overdueMonths} ${overdueMonths === 1 ? 'mês' : 'meses'}):</span>
+                <span class="text-white font-black text-sm">R$ ${totalOverdue.toFixed(2)}</span>
             </div>
-            <span class="text-sm font-black ${statusColor} uppercase">${statusText}</span>
+        `;
+    }
+
+    userMonthlyEl.innerHTML = `
+        <div class="bg-slate-900 border ${borderColor} rounded-xl p-4 flex flex-col gap-1">
+            <div class="flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="bg-blue-500/10 p-2 rounded-lg border border-blue-500/20 shrink-0">
+                        <i data-lucide="calendar" class="w-4 h-4 text-blue-400"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 font-bold uppercase">Mensalidade</p>
+                        <p class="text-sm text-slate-300">Venc: <span class="font-bold text-white">${nextDue.toLocaleDateString()}</span></p>
+                    </div>
+                </div>
+                <span class="text-sm font-black ${statusColor} uppercase">${statusText}</span>
+            </div>
+            ${overdueText}
         </div>
     `;
     if (isOverdue && currentPixKey) {
