@@ -564,10 +564,10 @@ function renderCaixaView(isAdmin, userList) {
                 const typeText = isCredit ? 'Crédito' : 'Débito';
                 tbody.innerHTML += `
                     <tr>
-                        <td class="px-4 py-3 text-slate-300">${dateStr}</td>
-                        <td class="px-4 py-3 text-white font-bold">${entry.description}</td>
-                        <td class="px-4 py-3 ${color} font-bold">${typeText}</td>
-                        <td class="px-4 py-3 text-right ${color} font-bold">${sign} R$ ${value.toFixed(2)}</td>
+                        <td class="px-2 py-2 sm:px-4 sm:py-3 text-slate-300">${dateStr}</td>
+                        <td class="px-2 py-2 sm:px-4 sm:py-3 text-white font-bold break-words">${entry.description}</td>
+                        <td class="px-2 py-2 sm:px-4 sm:py-3 ${color} font-bold">${typeText}</td>
+                        <td class="px-2 py-2 sm:px-4 sm:py-3 text-right ${color} font-bold whitespace-nowrap">${sign} R$ ${value.toFixed(2)}</td>
                     </tr>
                 `;
             }
@@ -575,9 +575,9 @@ function renderCaixaView(isAdmin, userList) {
             if (tbodyPlayer) {
                 tbodyPlayer.innerHTML += `
                     <tr>
-                        <td class="px-3 py-2 text-slate-300">${dateStr}</td>
-                        <td class="px-3 py-2 text-white font-bold text-xs">${entry.description}</td>
-                        <td class="px-3 py-2 text-right ${color} font-bold whitespace-nowrap">${sign} R$ ${value.toFixed(2)}</td>
+                        <td class="px-2 py-2 sm:px-3 sm:py-2 text-slate-300">${dateStr}</td>
+                        <td class="px-2 py-2 sm:px-3 sm:py-2 text-white font-bold text-xs break-words">${entry.description}</td>
+                        <td class="px-2 py-2 sm:px-3 sm:py-2 text-right ${color} font-bold whitespace-nowrap">${sign} R$ ${value.toFixed(2)}</td>
                     </tr>
                 `;
             }
@@ -594,10 +594,12 @@ function renderCaixaView(isAdmin, userList) {
         const playerCaixaView = document.getElementById('playerCaixaView');
         const playerCaixaExtratoPanel = document.getElementById('playerCaixaExtratoPanel');
         
-        const shouldShow = currentCaixaVisibility || isAdmin;
+        const isRegularPlayer = !(state.currentUserRole === 'admin' || state.isMaster);
+        const shouldShowExtrato = isRegularPlayer && currentCaixaVisibility;
+        const shouldShowBalance = currentCaixaVisibility || isAdmin;
 
         if (playerCaixaView) {
-            if (shouldShow) {
+            if (shouldShowBalance) {
                 playerCaixaView.classList.remove('hidden');
                 const playerBalance = document.getElementById('playerCaixaBalance');
                 if (playerBalance) {
@@ -610,10 +612,12 @@ function renderCaixaView(isAdmin, userList) {
         }
 
         if (playerCaixaExtratoPanel) {
-            if (shouldShow) {
+            if (shouldShowExtrato) {
                 playerCaixaExtratoPanel.classList.remove('hidden');
+                playerCaixaExtratoPanel.classList.add('flex');
             } else {
                 playerCaixaExtratoPanel.classList.add('hidden');
+                playerCaixaExtratoPanel.classList.remove('flex');
             }
         }
     });
@@ -637,10 +641,13 @@ export const toggleCaixaVisibility = async (isVisible) => {
         }
         const playerCaixaExtratoPanel = document.getElementById('playerCaixaExtratoPanel');
         if (playerCaixaExtratoPanel) {
-            if (isVisible || state.currentUserRole === 'admin' || state.isMaster) {
+            const isRegularPlayer = !(state.currentUserRole === 'admin' || state.isMaster);
+            if (isVisible && isRegularPlayer) {
                 playerCaixaExtratoPanel.classList.remove('hidden');
+                playerCaixaExtratoPanel.classList.add('flex');
             } else {
                 playerCaixaExtratoPanel.classList.add('hidden');
+                playerCaixaExtratoPanel.classList.remove('flex');
             }
         }
     } catch (e) {
