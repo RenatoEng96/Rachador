@@ -91,5 +91,18 @@ export const state = {
         isRunning: false,
         secondsLeft: 0,
         intervalId: null
-    }
+    },
+
+    // ---------------------------------------------------
+    // 8. DADOS FINANCEIROS E CONFIGURAÇÕES DE PAGAMENTO
+    // ---------------------------------------------------
+    paymentSettings: {
+        pixKey: '',
+        monthlyValue: 0,
+        monthlyDay: 10,
+        caixaVisibility: false,
+        blockLatePlayers: false,
+        maxLateCharges: 1
+    },
+    charges: []
 };

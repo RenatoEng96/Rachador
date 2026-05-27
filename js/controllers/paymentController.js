@@ -68,6 +68,25 @@ export const renderPaymentsView = async () => {
                 const cvCheck = document.getElementById('caixaVisibility');
                 if (cvCheck) cvCheck.checked = currentCaixaVisibility;
 
+                const blockCheck = document.getElementById('blockLatePlayers');
+                if (blockCheck) {
+                    blockCheck.checked = data.blockLatePlayers || false;
+                    const opts = document.getElementById('blockLatePlayersOptions');
+                    if (opts) {
+                        if (blockCheck.checked) {
+                            opts.classList.remove('hidden');
+                        } else {
+                            opts.classList.add('hidden');
+                        }
+                    }
+                }
+
+                const maxInput = document.getElementById('maxLateCharges');
+                if (maxInput) maxInput.value = data.maxLateCharges || 1;
+                
+                const btnGeneral = document.getElementById('btnSaveGeneralSettings');
+                if (btnGeneral) btnGeneral.classList.add('hidden');
+
                 // Popula lista de jogadores para diária
                 const list = document.getElementById('diariaPlayersList');
                 if (list) {
@@ -900,5 +919,43 @@ export const addCaixaEntry = async () => {
         console.error(e);
         showToast("Erro ao adicionar registro.", "error");
     }
+};
+
+export const saveGeneralPaymentSettings = async () => {
+    if (!state.currentGroupId) return;
+    const blockLatePlayers = document.getElementById('blockLatePlayers')?.checked || false;
+    const maxLateCharges = parseInt(document.getElementById('maxLateCharges')?.value) || 1;
+    
+    try {
+        await setDoc(doc(db, 'groups', state.currentGroupId, 'paymentSettings', 'global'), {
+            blockLatePlayers,
+            maxLateCharges
+        }, { merge: true });
+        
+        showToast('Configurações salvas com sucesso!', 'success');
+        
+        const btn = document.getElementById('btnSaveGeneralSettings');
+        if (btn) btn.classList.add('hidden');
+    } catch (e) {
+        console.error(e);
+        showToast('Erro ao salvar configurações.', 'error');
+    }
+};
+
+export const toggleBlockLatePlayersSection = (isChecked) => {
+    const opts = document.getElementById('blockLatePlayersOptions');
+    if (opts) {
+        if (isChecked) {
+            opts.classList.remove('hidden');
+        } else {
+            opts.classList.add('hidden');
+        }
+    }
+    showGeneralSettingsSaveBtn();
+};
+
+export const showGeneralSettingsSaveBtn = () => {
+    const btn = document.getElementById('btnSaveGeneralSettings');
+    if (btn) btn.classList.remove('hidden');
 };
 

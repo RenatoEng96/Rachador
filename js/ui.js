@@ -841,6 +841,57 @@ export const renderRanking = () => {
     lucide.createIcons();
 };
 
+export const getNextDueDate = (paidUntilMillis, monthlyDay) => {
+    if (paidUntilMillis) {
+        return new Date(paidUntilMillis);
+    } else {
+        const today = new Date();
+        let nextDue = new Date(today.getFullYear(), today.getMonth(), monthlyDay);
+        if (today > nextDue) {
+            nextDue.setMonth(nextDue.getMonth() + 1);
+        }
+        return nextDue;
+    }
+};
+
+export const getPlayerLateChargesCount = (player) => {
+    let count = 0;
+    
+    // 1. Cobranças de Mensalidades em atraso
+    const settings = state.paymentSettings || {};
+    const monthlyValue = parseFloat(settings.monthlyValue) || 0;
+    const monthlyDay = parseInt(settings.monthlyDay) || 10;
+    
+    if (monthlyValue > 0) {
+        const now = new Date();
+        const nextDue = getNextDueDate(player.paidUntil, monthlyDay);
+        if (now > nextDue) {
+            let tempDate = new Date(nextDue.getTime());
+            while (now > tempDate) {
+                count++;
+                tempDate.setMonth(tempDate.getMonth() + 1);
+            }
+        }
+    }
+    
+    // 2. Cobranças Diárias em atraso (status === 'pending' e Date.now() > dueDate)
+    if (state.charges && state.charges.length > 0) {
+        const playerEmail = player.email ? player.email.toLowerCase().trim() : '';
+        const nowMillis = Date.now();
+        
+        state.charges.forEach(charge => {
+            const chargeEmail = charge.playerEmail ? charge.playerEmail.toLowerCase().trim() : '';
+            const matchesPlayer = (player.id && charge.playerId === player.id) || (playerEmail && chargeEmail === playerEmail);
+            
+            if (matchesPlayer && charge.status === 'pending' && nowMillis > charge.dueDate) {
+                count++;
+            }
+        });
+    }
+    
+    return count;
+};
+
 export const renderSorteioTable = () => {
     const tbody = document.getElementById('sorteioTableBody');
     if(!tbody) return;
@@ -880,18 +931,42 @@ export const renderSorteioTable = () => {
     tbody.innerHTML = sorted.map(p => {
         const lvlInfo = getLevelInfo(p.eloRating ?? 0);
         const catInfo = getCategoryInfo(p.categoria);
+        
+        // Bloqueio por atraso de pagamento
+        const lateCharges = getPlayerLateChargesCount(p);
+        const isBlocked = (state.paymentSettings?.blockLatePlayers === true) && (lateCharges >= (state.paymentSettings?.maxLateCharges || 1));
+        
+        if (isBlocked) {
+            state.selectedPlayerIds.delete(p.id);
+        }
+        
         const isSelected = state.selectedPlayerIds.has(p.id);
         
+        const rowClickAction = isBlocked
+            ? ""
+            : `onclick="const c = document.getElementById('chk-${p.id}'); c.checked = !c.checked; togglePlayerSelection('${p.id}', c.checked); updateSorteioCounters();"`;
+            
+        const checkboxHTML = isBlocked
+            ? `<input type="checkbox" id="chk-${p.id}" disabled class="w-3 h-3 sm:w-4 sm:h-4 cursor-not-allowed opacity-30">`
+            : `<input type="checkbox" id="chk-${p.id}" ${isSelected ? 'checked' : ''} onclick="togglePlayerSelection('${p.id}', this.checked); updateSorteioCounters();" class="w-3 h-3 sm:w-4 sm:h-4 accent-green-500 cursor-pointer">`;
+            
+        const warningIconHTML = isBlocked
+            ? `<span class="flex items-center text-red-500 animate-pulse ml-1.5" title="Inelegível por atraso">
+                   <i data-lucide="alert-triangle" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+               </span>`
+            : "";
+        
         return `
-            <tr class="hover:bg-slate-700/30 transition-colors cursor-pointer" onclick="const c = document.getElementById('chk-${p.id}'); c.checked = !c.checked; togglePlayerSelection('${p.id}', c.checked); updateSorteioCounters();">
+            <tr class="hover:bg-slate-700/30 transition-colors cursor-pointer" ${rowClickAction}>
                 <td class="px-1 sm:px-2 py-3 text-center" onclick="event.stopPropagation()">
-                    <input type="checkbox" id="chk-${p.id}" ${isSelected ? 'checked' : ''} onclick="togglePlayerSelection('${p.id}', this.checked); updateSorteioCounters();" class="w-3 h-3 sm:w-4 sm:h-4 accent-green-500 cursor-pointer">
+                    ${checkboxHTML}
                 </td>
                 <td class="px-1 sm:px-3 py-3 font-bold ${catInfo.text} flex items-center gap-1 sm:gap-2 whitespace-nowrap">
                     <div class="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center overflow-hidden shrink-0">
                         ${p.photo ? `<img src="${p.photo}" class="w-full h-full object-cover">` : `<i data-lucide="${p.role === 'moderador' ? 'shield-check' : 'user'}" class="w-3 h-3 text-slate-400"></i>`}
                     </div>
-                    <span class="truncate max-w-[80px] sm:max-w-none">${p.name}</span>
+                    <span class="truncate max-w-[80px] sm:max-w-none ${isBlocked ? 'line-through text-slate-500 opacity-60' : ''}">${p.name}</span>
+                    ${warningIconHTML}
                 </td>
                 <td class="px-1 sm:px-3 py-3 text-center">
                     <span class="px-1 sm:px-2 py-1 rounded-md text-[8px] sm:text-[9px] font-bold ${catInfo.bg} ${catInfo.text} opacity-90">${catInfo.label}</span>

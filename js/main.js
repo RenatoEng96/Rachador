@@ -24,7 +24,8 @@ import {
 } from './controllers/adminController.js';
 import {
     setPaymentAdminTab, renderPaymentsView, savePaymentSettings,
-    generateDailyCharges, toggleCaixaVisibility, addCaixaEntry
+    generateDailyCharges, toggleCaixaVisibility, addCaixaEntry,
+    saveGeneralPaymentSettings, toggleBlockLatePlayersSection, showGeneralSettingsSaveBtn
 } from './controllers/paymentController.js';
 
 // Importação das novas variáveis e métodos do Firebase
@@ -404,7 +405,44 @@ const initDatabaseListeners = async () => {
         }
     });
 
-    state.unsubscribeGroup.push(unsubPlayers, unsubTeams, unsubMatches, unsubSettings);
+    const unsubPaymentSettings = onSnapshot(doc(db, 'groups', state.currentGroupId, 'paymentSettings', 'global'), (docSnap) => {
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            state.paymentSettings = {
+                pixKey: data.pixKey || '',
+                monthlyValue: parseFloat(data.monthlyValue) || 0,
+                monthlyDay: parseInt(data.monthlyDay) || 10,
+                caixaVisibility: data.caixaVisibility || false,
+                blockLatePlayers: data.blockLatePlayers || false,
+                maxLateCharges: parseInt(data.maxLateCharges) || 1
+            };
+        } else {
+            state.paymentSettings = {
+                pixKey: '',
+                monthlyValue: 0,
+                monthlyDay: 10,
+                caixaVisibility: false,
+                blockLatePlayers: false,
+                maxLateCharges: 1
+            };
+        }
+        renderAll();
+    }, (err) => {
+        if (err.code !== 'permission-denied') {
+            console.error('Erro ao ler paymentSettings:', err);
+        }
+    });
+
+    const unsubCharges = onSnapshot(collection(db, 'groups', state.currentGroupId, 'charges'), (s) => {
+        state.charges = s.docs.map(d => ({id: d.id, ...d.data()}));
+        renderAll();
+    }, (err) => {
+        if (err.code !== 'permission-denied') {
+            console.error('Erro ao ler charges:', err);
+        }
+    });
+
+    state.unsubscribeGroup.push(unsubPlayers, unsubTeams, unsubMatches, unsubSettings, unsubPaymentSettings, unsubCharges);
 };
 
 // --- NOVAS FUNÇÕES: CONFIG DE SORTEIO ---
@@ -606,7 +644,8 @@ Object.assign(window, {
     handleCreateGroup, selectGroup, saveUserProfile, removeUserProfilePhoto, renderAdminTable,
     // NOVOS BINDINGS DE PAGAMENTOS:
     setPaymentAdminTab, renderPaymentsView, savePaymentSettings, generateDailyCharges,
-    toggleCaixaVisibility, addCaixaEntry,
+    toggleCaixaVisibility, addCaixaEntry, saveGeneralPaymentSettings, toggleBlockLatePlayersSection,
+    showGeneralSettingsSaveBtn,
     // NOVOS BINDINGS DE PLACAR:
     openPlacarConfigModal, closePlacarConfigModal, savePlacarConfig, toggleTimer, resetTimer, playBeepSound, checkWinCondition,
     syncDraftSettings

@@ -42,10 +42,9 @@ service cloud.firestore {
       }
 
       match /charges/{chargeId} {
-        // Admin pode ler todas. Usuário só as suas.
+        // Admin pode ler todas. Membros do grupo também.
         allow read: if isMaster() 
-                    || (request.auth != null && (request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.get('adminUids', []) || request.auth.token.email in get(/databases/$(database)/documents/groups/$(groupId)).data.get('moderatorEmails', [])))
-                    || (request.auth != null && resource.data.playerEmail == request.auth.token.email);
+                    || (request.auth != null && request.auth.token.email in get(/databases/$(database)/documents/groups/$(groupId)).data.get('memberEmails', []));
         
         // Apenas Admin pode criar/escrever cobranças pelo painel
         allow write: if isMaster() || (request.auth != null && (request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.get('adminUids', []) || request.auth.token.email in get(/databases/$(database)/documents/groups/$(groupId)).data.get('moderatorEmails', [])));
