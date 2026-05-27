@@ -1076,18 +1076,20 @@ export const renderTeams = () => {
         
         const controlsHTML = !t.isWaitlist ? `
             <div class="absolute top-3 right-3 flex gap-1">
-                <button onclick="redrawTeamWithWaitlist('${t.id}')" class="p-1.5 rounded-lg border border-blue-500/30 bg-blue-500/10 text-blue-400" title="Substituir Pela Espera">
+                <button onclick="redrawTeamWithWaitlist('${t.id}')" class="p-1.5 flex items-center gap-1 text-[10px] font-black rounded-lg border border-blue-500/30 bg-blue-500/10 text-blue-400 transition-colors hover:bg-blue-500/20" title="Substituir Pela Espera">
                     <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+                    <span>Substituir com Time Fora</span>
                 </button>
-                <button onclick="deleteTeam('${t.id}')" class="p-1.5 rounded-lg border border-red-500/30 bg-red-500/10 text-red-500" title="Excluir Equipe">
+                <button onclick="deleteTeam('${t.id}')" class="p-1.5 rounded-lg border border-red-500/30 bg-red-500/10 text-red-500 transition-colors hover:bg-red-500/20" title="Excluir Equipe">
                     <i data-lucide="trash-2" class="w-3 h-3"></i>
                 </button>
             </div>` : `
             <div class="absolute top-3 right-3 flex gap-1">
-                <button onclick="promoteWaitlistToTeam('${t.id}')" class="p-1.5 rounded-lg border border-green-500/30 bg-green-500/10 text-green-400" title="Formar Novo Time com a Espera">
+                <button onclick="promoteWaitlistToTeam('${t.id}')" class="p-1.5 flex items-center gap-1 text-[10px] font-black rounded-lg border border-green-500/30 bg-green-500/10 text-green-400 transition-colors hover:bg-green-500/20" title="Formar Novo Time com a Espera">
                     <i data-lucide="arrow-up-circle" class="w-3 h-3"></i>
+                    <span>Transformar em Time Completo</span>
                 </button>
-                <button onclick="deleteTeam('${t.id}')" class="p-1.5 rounded-lg border border-red-500/30 bg-red-500/10 text-red-500" title="Excluir Lista de Espera">
+                <button onclick="deleteTeam('${t.id}')" class="p-1.5 rounded-lg border border-red-500/30 bg-red-500/10 text-red-500 transition-colors hover:bg-red-500/20" title="Excluir Lista de Espera">
                     <i data-lucide="trash-2" class="w-3 h-3"></i>
                 </button>
             </div>`;
@@ -1130,7 +1132,7 @@ export const renderTeams = () => {
         return `
             <div class="team-container w-full p-4 rounded-xl border relative shadow-lg ${t.isWaitlist ? 'bg-slate-800/40 border-slate-600' : 'border-slate-700 bg-slate-800/80'}">
                 ${controlsHTML}
-                <h3 class="font-bold ${t.isWaitlist ? 'text-slate-400' : 'text-green-500'} text-base mb-3 uppercase w-3/4">${teamName}</h3>
+                <h3 class="font-bold ${t.isWaitlist ? 'text-slate-400' : 'text-green-500'} text-base mb-3 uppercase max-w-[40%] truncate">${teamName}</h3>
                 <div class="space-y-2 mt-2">
                     ${playersHTML}
                 </div>
