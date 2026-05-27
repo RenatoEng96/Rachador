@@ -126,12 +126,16 @@ const renderMonthlyView = (isAdmin, monthlyDay, adminTable, userMonthlyEl) => {
             const statusText = isOverdue ? 'Atrasado' : 'Em dia';
             adminTable.innerHTML += `
                 <tr>
-                    <td class="px-4 py-3 font-bold text-white">${p.name}</td>
-                    <td class="px-4 py-3 text-center text-slate-300">${nextDue.toLocaleDateString()}</td>
-                    <td class="px-4 py-3 text-center font-bold ${statusColor}">${statusText}</td>
-                    <td class="px-4 py-3 text-right">
-                        <button onclick="addMonthlyPayment('${p.id}', '${p.name.replace(/'/g, "\\'")}',-1)" class="bg-red-600 hover:bg-red-500 text-white px-2 py-1 rounded text-xs font-bold transition-colors mr-1">-1 Mês</button>
-                        <button onclick="addMonthlyPayment('${p.id}', '${p.name.replace(/'/g, "\\'")}', 1)" class="bg-blue-600 hover:bg-blue-500 text-white px-2 py-1 rounded text-xs font-bold transition-colors">+1 Mês</button>
+                    <td class="px-2 py-2 sm:px-4 sm:py-3 font-bold text-white break-words">${p.name}</td>
+                    <td class="px-2 py-2 sm:px-4 sm:py-3 text-center text-slate-300">${nextDue.toLocaleDateString()}</td>
+                    <td class="px-2 py-2 sm:px-4 sm:py-3 text-center font-bold ${statusColor}">${statusText}</td>
+                    <td class="px-2 py-2 sm:px-4 sm:py-3 text-right whitespace-nowrap">
+                        <button onclick="addMonthlyPayment('${p.id}', '${p.name.replace(/'/g, "\\'")}', -1)" class="bg-red-600 hover:bg-red-500 text-white px-1.5 py-1 sm:px-2 sm:py-1 rounded text-[9px] sm:text-xs font-bold transition-colors mr-1">
+                            <span class="sm:inline hidden">-1 Mês</span><span class="sm:hidden">-1M</span>
+                        </button>
+                        <button onclick="addMonthlyPayment('${p.id}', '${p.name.replace(/'/g, "\\'")}', 1)" class="bg-blue-600 hover:bg-blue-500 text-white px-1.5 py-1 sm:px-2 sm:py-1 rounded text-[9px] sm:text-xs font-bold transition-colors">
+                            <span class="sm:inline hidden">+1 Mês</span><span class="sm:hidden">+1M</span>
+                        </button>
                     </td>
                 </tr>
             `;
@@ -297,17 +301,17 @@ const renderDailyView = (isAdmin, adminTable, userDailyEl, userPixEl) => {
                 const statusText  = charge.status === 'paid' ? 'Pago' : 'Pendente';
                 adminTable.innerHTML += `
                     <tr>
-                        <td class="px-4 py-3 font-bold text-white">${charge.playerName}</td>
-                        <td class="px-4 py-3 text-slate-300">${charge.description}</td>
-                        <td class="px-4 py-3 text-white">R$ ${charge.value.toFixed(2)}</td>
-                        <td class="px-4 py-3 text-center font-bold ${statusColor}">${statusText}</td>
-                        <td class="px-4 py-3 text-right">
-                            <div class="flex justify-end gap-2">
+                        <td class="px-2 py-2 sm:px-4 sm:py-3 font-bold text-white break-words">${charge.playerName}</td>
+                        <td class="px-2 py-2 sm:px-4 sm:py-3 text-slate-300 break-words">${charge.description}</td>
+                        <td class="px-2 py-2 sm:px-4 sm:py-3 text-white whitespace-nowrap">R$ ${charge.value.toFixed(2)}</td>
+                        <td class="px-2 py-2 sm:px-4 sm:py-3 text-center font-bold ${statusColor}">${statusText}</td>
+                        <td class="px-2 py-2 sm:px-4 sm:py-3 text-right">
+                            <div class="flex justify-end gap-1 sm:gap-2">
                                 ${charge.status !== 'paid' ? `<button onclick="markChargeAsPaid('${charge.id}', '${(charge.playerName||'Jogador').replace(/'/g,"\\'")}')"
-                                    class="bg-green-600 hover:bg-green-500 text-white px-2 py-1 rounded text-xs font-bold transition-colors">Pago</button>` : '<span class="text-slate-500 text-xs">-</span>'}
+                                    class="bg-green-600 hover:bg-green-500 text-white px-1.5 py-1 sm:px-2 sm:py-1 rounded text-[10px] sm:text-xs font-bold transition-colors">Pago</button>` : '<span class="text-slate-500 text-xs">-</span>'}
                                 <button onclick="deleteCharge('${charge.id}', '${(charge.playerName||'Jogador').replace(/'/g,"\\'")}')"
-                                    class="bg-red-600 hover:bg-red-500 text-white p-1 rounded transition-colors" title="Excluir">
-                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    class="bg-red-600 hover:bg-red-500 text-white p-1 rounded transition-colors flex items-center justify-center font-bold" title="Excluir">
+                                    <i data-lucide="trash-2" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
                                 </button>
                             </div>
                         </td>
