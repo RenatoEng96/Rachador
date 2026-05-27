@@ -560,9 +560,9 @@
                         <h2 class="text-2xl font-black text-white mb-1">Seu Perfil</h2>
                         <p class="text-sm text-slate-400 mb-4">Seus dados oficiais no Rachador.</p>
                         <label class="text-xs font-bold text-slate-400 mb-1 block uppercase tracking-wider">Como você quer ser chamado?</label>
-                        <input type="text" id="userProfileNameInput" placeholder="Seu nome de jogador" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-4 text-white outline-none focus:border-blue-500 transition-colors font-bold text-lg text-center sm:text-left">
+                        <input type="text" id="userProfileNameInput" placeholder="Seu nome de jogador" oninput="checkProfileChanges()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-4 text-white outline-none focus:border-blue-500 transition-colors font-bold text-lg text-center sm:text-left">
                     </div>
-                    <button onclick="saveUserProfile()" id="btnSaveProfile" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30 mx-auto sm:mx-0">
+                    <button onclick="saveUserProfile()" id="btnSaveProfile" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30 mx-auto sm:mx-0 hidden">
                         <i data-lucide="save" class="w-5 h-5"></i> SALVAR PERFIL
                     </button>
                 </div>

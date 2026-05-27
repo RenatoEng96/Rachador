@@ -468,6 +468,23 @@ export const syncDraftSettings = async () => {
 };
 
 // --- NOVAS FUNÇÕES: PERFIL DO USUÁRIO ---
+export const checkProfileChanges = () => {
+    const currentName = document.getElementById('userProfileNameInput')?.value.trim() || '';
+    const currentPhoto = document.getElementById('userProfilePhotoData')?.value || '';
+    
+    const originalName = state.userProfile?.name || '';
+    const originalPhoto = state.userProfile?.photo || '';
+    
+    const btn = document.getElementById('btnSaveProfile');
+    if (!btn) return;
+    
+    if (currentName !== originalName || currentPhoto !== originalPhoto) {
+        btn.classList.remove('hidden');
+    } else {
+        btn.classList.add('hidden');
+    }
+};
+
 export const saveUserProfile = async () => {
     const name = document.getElementById('userProfileNameInput').value.trim();
     const photo = document.getElementById('userProfilePhotoData').value;
@@ -535,6 +552,7 @@ export const saveUserProfile = async () => {
     } finally {
         btn.innerHTML = '<i data-lucide="save" class="w-5 h-5"></i> SALVAR PERFIL';
         btn.disabled = false;
+        checkProfileChanges();
         if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 };
@@ -564,6 +582,7 @@ export const removeUserProfilePhoto = async () => {
     photoData.value = ''; // Esvazia o valor que será salvo
     btnRemove.classList.add('hidden');
 
+    checkProfileChanges();
     showToast("Foto removida. Não esqueça de clicar em 'Salvar Perfil'.", "info");
 };
 
@@ -573,6 +592,7 @@ window.handleUserProfilePhotoUpload = async (event) => {
 
     const btnSave = document.getElementById('btnSaveProfile');
     btnSave.disabled = true;
+    btnSave.classList.remove('hidden');
     btnSave.innerText = "CARREGANDO FOTO...";
     showToast("A fazer upload da sua foto...", "info");
 
@@ -597,6 +617,7 @@ window.handleUserProfilePhotoUpload = async (event) => {
     } finally {
         btnSave.disabled = false;
         btnSave.innerHTML = '<i data-lucide="save" class="w-5 h-5"></i> SALVAR PERFIL';
+        checkProfileChanges();
         if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 };
@@ -641,7 +662,7 @@ Object.assign(window, {
     openSupportModal, closeSupportModal, copySupportEmail,
     // NOVOS BINDINGS DE SAAS:
     handleAuthAction, toggleAuthMode, handlePasswordReset, handleLogout, handleGoogleLogin, 
-    handleCreateGroup, selectGroup, saveUserProfile, removeUserProfilePhoto, renderAdminTable,
+    handleCreateGroup, selectGroup, saveUserProfile, removeUserProfilePhoto, renderAdminTable, checkProfileChanges,
     // NOVOS BINDINGS DE PAGAMENTOS:
     setPaymentAdminTab, renderPaymentsView, savePaymentSettings, generateDailyCharges,
     toggleCaixaVisibility, addCaixaEntry, saveGeneralPaymentSettings, toggleBlockLatePlayersSection,
@@ -650,7 +671,6 @@ Object.assign(window, {
     openPlacarConfigModal, closePlacarConfigModal, savePlacarConfig, toggleTimer, resetTimer, playBeepSound, checkWinCondition,
     syncDraftSettings
 });
-
 // ============================================================================
 // BOOTSTRAP DA APLICAÇÃO
 // ============================================================================
@@ -689,6 +709,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('userProfilePhotoData').value = '';
                     document.getElementById('btnRemoveProfilePhoto').classList.add('hidden');
                 }
+                checkProfileChanges();
             } catch (error) { console.error("Erro ao puxar perfil", error); }
 
             switchView('groups');
@@ -714,6 +735,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const btnRemove = document.getElementById('btnRemoveProfilePhoto');
             if (btnRemove) btnRemove.classList.add('hidden');
 
+            checkProfileChanges();
             clearAllListeners();
             switchView('landing');
         }
