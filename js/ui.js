@@ -1078,7 +1078,7 @@ export const renderTeams = () => {
             <div class="absolute top-3 right-3 flex gap-1">
                 <button onclick="redrawTeamWithWaitlist('${t.id}')" class="p-1.5 flex items-center gap-1 text-[10px] font-black rounded-lg border border-blue-500/30 bg-blue-500/10 text-blue-400 transition-colors hover:bg-blue-500/20" title="Substituir Pela Espera">
                     <i data-lucide="refresh-cw" class="w-3 h-3"></i>
-                    <span>Substituir com Time Fora</span>
+                    <span>Mesclar com Time Fora</span>
                 </button>
                 <button onclick="deleteTeam('${t.id}')" class="p-1.5 rounded-lg border border-red-500/30 bg-red-500/10 text-red-500 transition-colors hover:bg-red-500/20" title="Excluir Equipe">
                     <i data-lucide="trash-2" class="w-3 h-3"></i>
@@ -1087,7 +1087,7 @@ export const renderTeams = () => {
             <div class="absolute top-3 right-3 flex gap-1">
                 <button onclick="promoteWaitlistToTeam('${t.id}')" class="p-1.5 flex items-center gap-1 text-[10px] font-black rounded-lg border border-green-500/30 bg-green-500/10 text-green-400 transition-colors hover:bg-green-500/20" title="Formar Novo Time com a Espera">
                     <i data-lucide="arrow-up-circle" class="w-3 h-3"></i>
-                    <span>Transformar em Time Completo</span>
+                    <span>Montar Time</span>
                 </button>
                 <button onclick="deleteTeam('${t.id}')" class="p-1.5 rounded-lg border border-red-500/30 bg-red-500/10 text-red-500 transition-colors hover:bg-red-500/20" title="Excluir Lista de Espera">
                     <i data-lucide="trash-2" class="w-3 h-3"></i>
@@ -1438,6 +1438,22 @@ export const renderAll = () => {
     renderRanking(); 
     renderPlacarTeams(); 
     renderMatchHistory(); 
+
+    // Controle dinâmico de visibilidade para o "Placar Aberto" na aba placar
+    const placarAbertoContainer = document.getElementById('placarAbertoContainer');
+    const placarToolbarSpacer = document.getElementById('placarToolbarSpacer');
+    if (placarAbertoContainer && placarToolbarSpacer) {
+        const isAdminOrMod = state.currentUserRole === 'admin' || state.isMaster;
+        if (isAdminOrMod) {
+            placarAbertoContainer.classList.remove('hidden');
+            placarAbertoContainer.classList.add('flex');
+            placarToolbarSpacer.classList.add('hidden');
+        } else {
+            placarAbertoContainer.classList.add('hidden');
+            placarAbertoContainer.classList.remove('flex');
+            placarToolbarSpacer.classList.remove('hidden');
+        }
+    }
 };
 
 //updateSorteioCounters 
