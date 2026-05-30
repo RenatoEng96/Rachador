@@ -234,6 +234,10 @@ export const selectGroup = (groupId, groupName) => {
     if (publicTitle) {
         publicTitle.innerHTML = `${groupName.toUpperCase()}`;
     }
+    const rankingGroupText = document.getElementById('rankingGroupText');
+    if (rankingGroupText) {
+        rankingGroupText.innerText = `Os melhores jogadores de ${groupName}`;
+    }
 
     // MUDA O "CANO" DA BASE DE DADOS PARA A PASTA DESTE GRUPO
     setGroupContext(groupId);
@@ -677,7 +681,11 @@ Object.assign(window, {
 // BOOTSTRAP DA APLICAÇÃO
 // ============================================================================
 
-document.addEventListener('DOMContentLoaded', () => {
+import { loadViews } from './viewLoader.js';
+
+document.addEventListener('DOMContentLoaded', async () => {
+    // Carrega as views divididas antes de inicializar a aplicação
+    await loadViews();
     
     // O Observador agora escuta se a pessoa entrou na conta
     initAuthObserver(async (isAuthenticated, user) => {
