@@ -33,7 +33,8 @@ import {
     playersRef, teamsRef, matchHistoryRef, settingsRef, 
     globalGroupsRef, setGroupContext, deleteDoc, updateDoc,
     onSnapshot, addDoc, query, where, getDoc, doc, db,
-    storage, ref, uploadBytes, getDownloadURL, deleteObject 
+    storage, ref, uploadBytes, getDownloadURL, deleteObject,
+    collection
 } from './firebase.js';
 
 export const adjustBonus = (val) => {

@@ -511,25 +511,25 @@ const getPlayerBadgesHTML = (player, stats, craques, bagres, isExport = false) =
         <div class="${isExport ? '' : wrapperClass}" style="${isExport ? wrapperClass : ''}">
             ${(streak >= 3) ? `
                 <div class="${isExport ? '' : badgeStyle} border-orange-500/50 text-orange-500" style="${isExport ? badgeStyle + ' border-color: rgba(249, 115, 22, 0.5); color: #f97316;' : ''}">
-                    <i data-lucide="flame" class="w-4 h-4 text-orange-500 fill-orange-500" style="width: 16px; height: 16px; fill: #f97316;"></i>
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="currentColor" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" style="width: 16px; height: 16px; fill: #f97316;"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>
                     <span class="font-black text-xs pr-1.5" style="font-weight: 900; font-size: 12px; font-family: 'Oswald', sans-serif;">${streak}</span>
                 </div>
             ` : ''}
             ${(streak <= -3) ? `
                 <div class="${isExport ? '' : badgeStyle} border-blue-500/50 text-blue-500" style="${isExport ? badgeStyle + ' border-color: rgba(59, 130, 246, 0.5); color: #3b82f6;' : ''}">
-                    <i data-lucide="snowflake" class="w-4 h-4 text-blue-500 fill-blue-500" style="width: 16px; height: 16px; fill: #3b82f6;"></i>
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" style="width: 16px; height: 16px;"><line x1="2" y1="12" x2="22" y2="12"></line><line x1="12" y1="2" x2="12" y2="22"></line><path d="m20 4-16 16"></path><path d="m4 4 16 16"></path><path d="m12 4-4 4"></path><path d="m12 4 4 4"></path><path d="m12 20-4-4"></path><path d="m12 20 4-4"></path><path d="m4 12 4-4"></path><path d="m4 12 4 4"></path><path d="m20 12-4-4"></path><path d="m20 12-4 4"></path></svg>
                     <span class="font-black text-xs pr-1.5" style="font-weight: 900; font-size: 12px; font-family: 'Oswald', sans-serif;">${Math.abs(streak)}</span>
                 </div>
             ` : ''}
             ${isCraque ? `
                 <div class="${isExport ? '' : badgeStyle} border-yellow-400/50 text-yellow-400" style="${isExport ? badgeStyle + ' border-color: rgba(250, 204, 21, 0.5); color: #facc15;' : ''}">
-                    <i data-lucide="crown" class="w-4 h-4 text-yellow-400 fill-yellow-400" style="width: 16px; height: 16px; fill: #facc15;"></i>
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="currentColor" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" style="width: 16px; height: 16px; fill: #facc15;"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14a1 1 0 0 0 1-1v-1H4v1a1 1 0 0 0 1 1z"></path></svg>
                     <span class="font-black text-xs pr-1.5" style="font-weight: 900; font-size: 12px; font-family: 'Oswald', sans-serif;">${pStats.wins}</span>
                 </div>
             ` : ''}
             ${isBagre ? `
                 <div class="${isExport ? '' : badgeStyle} border-emerald-400/50 text-emerald-400" style="${isExport ? badgeStyle + ' border-color: rgba(52, 211, 153, 0.5); color: #34d399;' : ''}">
-                    <i data-lucide="fish" class="w-4 h-4 text-emerald-400" style="width: 16px; height: 16px;"></i>
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" style="width: 16px; height: 16px;"><path d="M6.5 12c.98 0 1.9-.37 2.6-1a3 3 0 0 0 2.2 1H15a2 2 0 1 0 0-4h-3.7a3 3 0 0 0-2.2 1c-.7-.63-1.62-1-2.6-1a4 4 0 0 0-4 4 4 4 0 0 0 4 4Z"></path><path d="M18 12a2 2 0 1 1 0-4"></path></svg>
                     <span class="font-black text-xs pr-1.5" style="font-weight: 900; font-size: 12px; font-family: 'Oswald', sans-serif;">${pStats.losses}</span>
                 </div>
             ` : ''}
@@ -785,7 +785,7 @@ const prepareExportTemplates = (type, playerName, day) => {
                             <span class="font-bold text-[8px] opacity-90 tracking-[0.15em]" style="font-family: 'Roboto Condensed', sans-serif;">ELO</span>
                         </div>
                         <div class="w-20 h-20 mt-3 mb-1 flex items-center justify-center bg-black/10 rounded-full border-2 border-yellow-400/60 text-yellow-200 shrink-0 overflow-hidden" style="z-index: 10;">
-                            ${player.photo ? `<img src="${player.photo}" class="w-full h-full object-cover">` : `<i data-lucide="user" class="w-10 h-10 opacity-80" style="width: 40px; height: 40px; color: #fef08a;"></i>`}
+                            ${player.photo ? `<img src="${player.photo}" class="w-full h-full object-cover">` : `<svg viewBox="0 0 24 24" width="40" height="40" stroke="#fef08a" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10 opacity-80" style="width: 40px; height: 40px; color: #fef08a;"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`}
                         </div>
                         <div class="player-name text-yellow-100" style="z-index: 10; font-size: 16px; font-weight: bold; font-family: 'Oswald', sans-serif; text-transform: uppercase; width: 90%; text-align: center; border-bottom: 2px solid currentColor; padding-bottom: 2px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">${player.name}</div>
                         <div class="w-full mt-2 flex justify-evenly items-center px-4" style="z-index: 10; font-family: 'Roboto Condensed', sans-serif;">
@@ -809,7 +809,11 @@ const prepareExportTemplates = (type, playerName, day) => {
                         <span class="font-bold text-[8px] opacity-90 tracking-[0.15em]" style="font-family: 'Roboto Condensed', sans-serif;">ELO</span>
                     </div>
                     <div class="w-20 h-20 mt-3 mb-1 flex items-center justify-center bg-black/10 rounded-full border-2 border-black/10 shrink-0 overflow-hidden" style="z-index: 10;">
-                        ${player.photo ? `<img src="${player.photo}" class="w-full h-full object-cover">` : `<i data-lucide="${player.role === 'moderador' ? 'shield-check' : 'user'}" class="w-10 h-10 opacity-80" style="width: 40px; height: 40px; color: #cbd5e1;"></i>`}
+                        ${player.photo ? `<img src="${player.photo}" class="w-full h-full object-cover">` : (player.role === 'moderador' ? `
+                            <svg viewBox="0 0 24 24" width="40" height="40" stroke="#cbd5e1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10 opacity-80" style="width: 40px; height: 40px; color: #cbd5e1;"><path d="M20 13c0 5-3.5 7.5-7.66 9.7a1 1 0 0 1-.68 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg>
+                        ` : `
+                            <svg viewBox="0 0 24 24" width="40" height="40" stroke="#cbd5e1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10 opacity-80" style="width: 40px; height: 40px; color: #cbd5e1;"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        `)}
                     </div>
                     <div class="player-name" style="z-index: 10; font-size: 16px; font-weight: bold; font-family: 'Oswald', sans-serif; text-transform: uppercase; width: 90%; text-align: center; border-bottom: 2px solid currentColor; padding-bottom: 2px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">${player.name}</div>
                     <div class="w-full mt-2 flex justify-evenly items-center px-4" style="z-index: 10; font-family: 'Roboto Condensed', sans-serif;">
@@ -951,6 +955,50 @@ const prepareExportTemplates = (type, playerName, day) => {
     }
 };
 
+// Helper para converter imagens remotas para Base64 usando múltiplos proxies CORS resilientes (resolvendo problemas de CORS/502)
+const convertImagesToBase64 = async (containerElement) => {
+    const images = containerElement.querySelectorAll('img');
+    const promises = Array.from(images).map(async (img) => {
+        const originalSrc = img.src;
+        if (originalSrc && originalSrc.startsWith('http') && !originalSrc.startsWith(window.location.origin) && !originalSrc.startsWith('data:')) {
+            // Proxies CORS múltiplos para alta disponibilidade e resiliência total a falhas 502/bloqueios
+            const proxies = [
+                `https://images.weserv.nl/?url=${encodeURIComponent(originalSrc)}`,
+                `https://corsproxy.io/?${encodeURIComponent(originalSrc)}`,
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(originalSrc)}`
+            ];
+            
+            let loaded = false;
+            for (const url of proxies) {
+                try {
+                    const res = await fetch(url);
+                    if (res.ok) {
+                        const blob = await res.blob();
+                        const base64 = await new Promise((resolve) => {
+                            const reader = new FileReader();
+                            reader.onloadend = () => resolve(reader.result);
+                            reader.readAsDataURL(blob);
+                        });
+                        img.src = base64;
+                        console.log(`Imagem remota convertida com sucesso usando o proxy: ${url.split('/')[2]}`);
+                        loaded = true;
+                        break;
+                    } else {
+                        console.warn(`Proxy ${url.split('/')[2]} retornou status ${res.status}. Tentando próximo...`);
+                    }
+                } catch (err) {
+                    console.warn(`Erro no proxy ${url.split('/')[2]}:`, err);
+                }
+            }
+            
+            if (!loaded) {
+                console.error("Todas as tentativas de proxy CORS falharam para a imagem:", originalSrc);
+            }
+        }
+    });
+    await Promise.all(promises);
+};
+
 export const exportPlayerHistory = async (type, action) => {
     const playerName = currentSelectedPlayerName;
     const day = currentSelectedDayStr;
@@ -959,6 +1007,12 @@ export const exportPlayerHistory = async (type, action) => {
         showToast("Selecione um atleta e um dia primeiro.", "error");
         return;
     }
+
+    // Fechar os dropdowns imediatamente ao iniciar a exportação
+    ['share-dropdown', 'download-dropdown'].forEach(dId => {
+        const d = document.getElementById(dId);
+        if (d) d.classList.add('hidden');
+    });
 
     const overlay = document.getElementById('share-loading-overlay');
     const loadingText = document.getElementById('share-loading-text');
@@ -979,6 +1033,9 @@ export const exportPlayerHistory = async (type, action) => {
         
         const targetElement = document.getElementById(targetId);
         
+        // Converter todas as imagens remotas do contêiner para Base64 antes da captura
+        await convertImagesToBase64(targetElement);
+        
         // Inicializar os ícones Lucide no elemento oculto antes da captura
         if (typeof lucide !== 'undefined') {
             lucide.createIcons({
@@ -990,8 +1047,8 @@ export const exportPlayerHistory = async (type, action) => {
             });
         }
         
-        // Timeout pequeno para garantir a injeção e renderização das SVGs dos ícones
-        await new Promise(resolve => setTimeout(resolve, 300));
+        // Timeout curto para garantir o reflow e carregamento perfeito das imagens em base64
+        await new Promise(resolve => setTimeout(resolve, 100));
         
         // 2. Renderizar o elemento invisível para um canvas de alta definição (scale: 2)
         const canvas = await html2canvas(targetElement, {
@@ -1000,6 +1057,88 @@ export const exportPlayerHistory = async (type, action) => {
             useCORS: true,
             logging: false
         });
+        
+        // Pós-processamento avançado do canvas para recortar o escudo em formato hexagonal (clip-path emulation)
+        try {
+            const cardEl = targetElement.querySelector('.winner-frame-wrapper') || targetElement.querySelector('.fifa-card');
+            if (cardEl) {
+                const rect = cardEl.getBoundingClientRect();
+                const parentRect = targetElement.getBoundingClientRect();
+                const scale = 2; // O mesmo scale usado no html2canvas
+                
+                const canvasX = (rect.left - parentRect.left) * scale;
+                const canvasY = (rect.top - parentRect.top) * scale;
+                const canvasW = rect.width * scale;
+                const canvasH = rect.height * scale;
+                
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                    // Obter a cor de fundo real do contêiner para mesclar e recortar perfeitamente
+                    const containerBgStyle = window.getComputedStyle(targetElement).backgroundColor;
+                    const containerBgColor = (containerBgStyle && containerBgStyle !== 'rgba(0, 0, 0, 0)') ? containerBgStyle : '#0f172a';
+                    ctx.fillStyle = containerBgColor;
+                    
+                    // Desenhar e preencher com a cor de fundo do contêiner as 4 quinas que devem ser removidas da imagem retangular
+                    
+                    // 1. Quina Superior Esquerda: de (0,0) a (50%, 0) e (0, 12%)
+                    ctx.beginPath();
+                    ctx.moveTo(canvasX, canvasY);
+                    ctx.lineTo(canvasX + canvasW / 2, canvasY);
+                    ctx.lineTo(canvasX, canvasY + canvasH * 0.12);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    // 2. Quina Superior Direita: de (100%, 0) a (50%, 0) e (100%, 12%)
+                    ctx.beginPath();
+                    ctx.moveTo(canvasX + canvasW, canvasY);
+                    ctx.lineTo(canvasX + canvasW / 2, canvasY);
+                    ctx.lineTo(canvasX + canvasW, canvasY + canvasH * 0.12);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    // 3. Quina Inferior Esquerda: de (0, 100%) a (50%, 100%) e (0, 88%)
+                    ctx.beginPath();
+                    ctx.moveTo(canvasX, canvasY + canvasH);
+                    ctx.lineTo(canvasX + canvasW / 2, canvasY + canvasH);
+                    ctx.lineTo(canvasX, canvasY + canvasH * 0.88);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    // 4. Quina Inferior Direita: de (100%, 100%) a (50%, 100%) e (100%, 88%)
+                    ctx.beginPath();
+                    ctx.moveTo(canvasX + canvasW, canvasY + canvasH);
+                    ctx.lineTo(canvasX + canvasW / 2, canvasY + canvasH);
+                    ctx.lineTo(canvasX + canvasW, canvasY + canvasH * 0.88);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    // Desenhar borda nítida de alta resolução para cartas normais (não destaques) seguindo o traçado do escudo
+                    if (cardEl.classList.contains('fifa-card')) {
+                        const computedStyle = window.getComputedStyle(cardEl);
+                        const borderColor = computedStyle.borderColor || '#cbd5e1';
+                        const borderWidth = parseFloat(computedStyle.borderWidth) || 4;
+                        
+                        ctx.strokeStyle = borderColor;
+                        ctx.lineWidth = borderWidth * scale;
+                        ctx.lineJoin = 'round';
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(canvasX + canvasW / 2, canvasY);
+                        ctx.lineTo(canvasX + canvasW, canvasY + canvasH * 0.12);
+                        ctx.lineTo(canvasX + canvasW, canvasY + canvasH * 0.88);
+                        ctx.lineTo(canvasX + canvasW / 2, canvasY + canvasH);
+                        ctx.lineTo(canvasX, canvasY + canvasH * 0.88);
+                        ctx.lineTo(canvasX, canvasY + canvasH * 0.12);
+                        ctx.closePath();
+                        ctx.stroke();
+                    }
+                    
+                    console.log("Canvas processado e quinas do escudo recortadas com sucesso!");
+                }
+            }
+        } catch (postErr) {
+            console.error("Erro no pós-processamento de corte hexagonal do canvas:", postErr);
+        }
         
         // 3. Exportar Canvas para Blob
         canvas.toBlob(async (blob) => {
@@ -2277,3 +2416,33 @@ export const copySupportEmail = () => {
             showToast("Erro ao copiar e-mail.", "error");
         });
 };
+
+// Funções para controle e toggle de dropdowns de exportação (Click-to-Toggle robusto)
+window.toggleDropdown = (event, id) => {
+    if (event) {
+        event.stopPropagation(); // Evita fechamento imediato no clique
+        event.preventDefault();
+    }
+    const dropdowns = ['share-dropdown', 'download-dropdown'];
+    dropdowns.forEach(dId => {
+        const d = document.getElementById(dId);
+        if (d) {
+            if (dId === id) {
+                d.classList.toggle('hidden');
+            } else {
+                d.classList.add('hidden');
+            }
+        }
+    });
+};
+
+// Fechar os dropdowns ao clicar em qualquer lugar fora deles
+document.addEventListener('click', (event) => {
+    const dropdowns = ['share-dropdown', 'download-dropdown'];
+    dropdowns.forEach(dId => {
+        const d = document.getElementById(dId);
+        if (d && !d.classList.contains('hidden')) {
+            d.classList.add('hidden');
+        }
+    });
+});
