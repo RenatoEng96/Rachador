@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rachador-pwa-v1';
+const CACHE_NAME = 'rachador-pwa-v2';
 const urlsToCache = [
   '/',
   '/index.html',

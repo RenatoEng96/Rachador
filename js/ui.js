@@ -242,12 +242,14 @@ export const switchView = (view) => {
     // Controle do título "Rachador" na nav bar
     const navBrandText = document.getElementById('navBrandText');
     if (navBrandText) {
-        if (view === 'groups' || view === 'auth') {
+        if (view === 'groups' || view === 'auth' || view === 'admin') {
             navBrandText.classList.remove('hidden');
             navBrandText.classList.add('block');
+            navBrandText.style.display = 'inline-block'; // Garante que fique visível mesmo com cache ou conflitos de CSS
         } else {
             navBrandText.classList.remove('block');
             navBrandText.classList.add('hidden');
+            navBrandText.style.display = ''; // Volta a usar o CSS do Tailwind
         }
     }
 
