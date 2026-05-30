@@ -1169,7 +1169,7 @@
                 </div>
                 
                 <!-- Body split into two columns -->
-                <div class="flex flex-col md:flex-row gap-6 flex-1 overflow-y-auto no-scrollbar min-h-0">
+                <div class="flex flex-col md:flex-row gap-6 flex-1 overflow-y-auto md:overflow-y-hidden min-h-0">
                     <!-- Left column: FIFA Card + Actions -->
                     <div class="flex flex-col items-center w-full md:w-auto md:shrink-0 bg-slate-900/40 p-4 rounded-xl border border-slate-700/50">
                         <div id="playerHistoryCardContainer" class="flex justify-center items-center py-2">
@@ -1210,7 +1210,7 @@
                         </div>
                         
                         <!-- List of matches -->
-                        <div id="playerHistoryList" class="overflow-y-auto space-y-2 flex-1 no-scrollbar pr-1">
+                        <div id="playerHistoryList" class="overflow-y-visible md:overflow-y-auto space-y-2 flex-1 md:no-scrollbar md:pr-1">
                             <!-- Partidas da aba selecionada inseridas aqui dinamicamente -->
                         </div>
                     </div>

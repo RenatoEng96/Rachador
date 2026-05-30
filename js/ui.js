@@ -1037,8 +1037,13 @@ export const exportPlayerHistory = async (type, action) => {
     const playerName = currentSelectedPlayerName;
     const day = currentSelectedDayStr;
     
-    if (!playerName || !day) {
-        showToast("Selecione um atleta e um dia primeiro.", "error");
+    if (!playerName) {
+        showToast("Selecione um atleta primeiro.", "error");
+        return;
+    }
+
+    if (type !== 'card' && !day) {
+        showToast("Este atleta não possui histórico de partidas para exportar.", "error");
         return;
     }
 
@@ -1103,7 +1108,9 @@ export const exportPlayerHistory = async (type, action) => {
         }
         
         const fileSlug = playerName.toLowerCase().replace(/\s+/g, '_');
-        const fileName = `${fileSlug}_${type}_${day.replace(/\//g, '-')}.png`;
+        const fileName = type === 'card'
+            ? `${fileSlug}_cartinha.png`
+            : `${fileSlug}_${type}_${day.replace(/\//g, '-')}.png`;
         
         if (action === 'share') {
             const file = new File([blob], fileName, { type: 'image/png' });
