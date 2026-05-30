@@ -1,6 +1,7 @@
 import { state } from './state.js';
 import { calculateEloMatch } from './services/rankingService.js';
 import { settingsRef, updateDoc } from './firebase.js';
+import { domToBlob } from 'https://unpkg.com/modern-screenshot?module';
 
 // ============================================================================
 // HELPERS DE UI ADICIONAIS
@@ -1050,154 +1051,70 @@ export const exportPlayerHistory = async (type, action) => {
         // Timeout curto para garantir o reflow e carregamento perfeito das imagens em base64
         await new Promise(resolve => setTimeout(resolve, 100));
         
-        // 2. Renderizar o elemento invisível para um canvas de alta definição (scale: 2)
-        const canvas = await html2canvas(targetElement, {
+        // 2. Renderizar o elemento com modern-screenshot (suporta clip-path, gradientes, pseudo-elementos nativamente)
+        const blob = await domToBlob(targetElement, {
             backgroundColor: '#0f172a',
             scale: 2,
-            useCORS: true,
-            logging: false
+            fetch: {
+                requestInit: { mode: 'cors' }
+            }
         });
         
-        // Pós-processamento avançado do canvas para recortar o escudo em formato hexagonal (clip-path emulation)
-        try {
-            const cardEl = targetElement.querySelector('.winner-frame-wrapper') || targetElement.querySelector('.fifa-card');
-            if (cardEl) {
-                const rect = cardEl.getBoundingClientRect();
-                const parentRect = targetElement.getBoundingClientRect();
-                const scale = 2; // O mesmo scale usado no html2canvas
-                
-                const canvasX = (rect.left - parentRect.left) * scale;
-                const canvasY = (rect.top - parentRect.top) * scale;
-                const canvasW = rect.width * scale;
-                const canvasH = rect.height * scale;
-                
-                const ctx = canvas.getContext('2d');
-                if (ctx) {
-                    // Obter a cor de fundo real do contêiner para mesclar e recortar perfeitamente
-                    const containerBgStyle = window.getComputedStyle(targetElement).backgroundColor;
-                    const containerBgColor = (containerBgStyle && containerBgStyle !== 'rgba(0, 0, 0, 0)') ? containerBgStyle : '#0f172a';
-                    ctx.fillStyle = containerBgColor;
-                    
-                    // Desenhar e preencher com a cor de fundo do contêiner as 4 quinas que devem ser removidas da imagem retangular
-                    
-                    // 1. Quina Superior Esquerda: de (0,0) a (50%, 0) e (0, 12%)
-                    ctx.beginPath();
-                    ctx.moveTo(canvasX, canvasY);
-                    ctx.lineTo(canvasX + canvasW / 2, canvasY);
-                    ctx.lineTo(canvasX, canvasY + canvasH * 0.12);
-                    ctx.closePath();
-                    ctx.fill();
-                    
-                    // 2. Quina Superior Direita: de (100%, 0) a (50%, 0) e (100%, 12%)
-                    ctx.beginPath();
-                    ctx.moveTo(canvasX + canvasW, canvasY);
-                    ctx.lineTo(canvasX + canvasW / 2, canvasY);
-                    ctx.lineTo(canvasX + canvasW, canvasY + canvasH * 0.12);
-                    ctx.closePath();
-                    ctx.fill();
-                    
-                    // 3. Quina Inferior Esquerda: de (0, 100%) a (50%, 100%) e (0, 88%)
-                    ctx.beginPath();
-                    ctx.moveTo(canvasX, canvasY + canvasH);
-                    ctx.lineTo(canvasX + canvasW / 2, canvasY + canvasH);
-                    ctx.lineTo(canvasX, canvasY + canvasH * 0.88);
-                    ctx.closePath();
-                    ctx.fill();
-                    
-                    // 4. Quina Inferior Direita: de (100%, 100%) a (50%, 100%) e (100%, 88%)
-                    ctx.beginPath();
-                    ctx.moveTo(canvasX + canvasW, canvasY + canvasH);
-                    ctx.lineTo(canvasX + canvasW / 2, canvasY + canvasH);
-                    ctx.lineTo(canvasX + canvasW, canvasY + canvasH * 0.88);
-                    ctx.closePath();
-                    ctx.fill();
-                    
-                    // Desenhar borda nítida de alta resolução para cartas normais (não destaques) seguindo o traçado do escudo
-                    if (cardEl.classList.contains('fifa-card')) {
-                        const computedStyle = window.getComputedStyle(cardEl);
-                        const borderColor = computedStyle.borderColor || '#cbd5e1';
-                        const borderWidth = parseFloat(computedStyle.borderWidth) || 4;
-                        
-                        ctx.strokeStyle = borderColor;
-                        ctx.lineWidth = borderWidth * scale;
-                        ctx.lineJoin = 'round';
-                        
-                        ctx.beginPath();
-                        ctx.moveTo(canvasX + canvasW / 2, canvasY);
-                        ctx.lineTo(canvasX + canvasW, canvasY + canvasH * 0.12);
-                        ctx.lineTo(canvasX + canvasW, canvasY + canvasH * 0.88);
-                        ctx.lineTo(canvasX + canvasW / 2, canvasY + canvasH);
-                        ctx.lineTo(canvasX, canvasY + canvasH * 0.88);
-                        ctx.lineTo(canvasX, canvasY + canvasH * 0.12);
-                        ctx.closePath();
-                        ctx.stroke();
-                    }
-                    
-                    console.log("Canvas processado e quinas do escudo recortadas com sucesso!");
-                }
-            }
-        } catch (postErr) {
-            console.error("Erro no pós-processamento de corte hexagonal do canvas:", postErr);
-        }
-        
-        // 3. Exportar Canvas para Blob
-        canvas.toBlob(async (blob) => {
-            if (!blob) {
-                showToast("Erro ao processar imagem.", "error");
-                if (overlay) {
-                    overlay.classList.add('hidden');
-                    overlay.classList.remove('flex');
-                }
-                return;
-            }
-            
-            const fileSlug = playerName.toLowerCase().replace(/\s+/g, '_');
-            const fileName = `${fileSlug}_${type}_${day.replace(/\//g, '-')}.png`;
-            
-            if (action === 'share') {
-                const file = new File([blob], fileName, { type: 'image/png' });
-                
-                // Valida suporte ao compartilhamento nativo de arquivos via Web Share API
-                if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-                    try {
-                        await navigator.share({
-                            title: `Cartinha de ${playerName}`,
-                            text: `Confira minha cartinha e histórico no Rachador!`,
-                            files: [file]
-                        });
-                        showToast("Compartilhado com sucesso!", "success");
-                    } catch (e) {
-                        if (e.name !== 'AbortError') {
-                            console.error("Compartilhamento nativo falhou:", e);
-                            downloadBlob(blob, fileName);
-                        }
-                    }
-                } else {
-                    // Fallback: Tenta copiar para área de transferência e faz o download automático
-                    try {
-                        await navigator.clipboard.write([
-                            new ClipboardItem({ 'image/png': blob })
-                        ]);
-                        showToast("Imagem copiada para a área de transferência! Baixando arquivo...", "success");
-                    } catch (e) {
-                        showToast("Formato não suportado. Baixando imagem...", "info");
-                    }
-                    downloadBlob(blob, fileName);
-                }
-            } else {
-                // Ação é download direta
-                downloadBlob(blob, fileName);
-                showToast("Imagem baixada com sucesso!", "success");
-            }
-            
+        if (!blob) {
+            showToast("Erro ao processar imagem.", "error");
             if (overlay) {
                 overlay.classList.add('hidden');
                 overlay.classList.remove('flex');
             }
-        }, 'image/png');
+            return;
+        }
+        
+        const fileSlug = playerName.toLowerCase().replace(/\s+/g, '_');
+        const fileName = `${fileSlug}_${type}_${day.replace(/\//g, '-')}.png`;
+        
+        if (action === 'share') {
+            const file = new File([blob], fileName, { type: 'image/png' });
+            
+            // Valida suporte ao compartilhamento nativo de arquivos via Web Share API
+            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({
+                        title: `Cartinha de ${playerName}`,
+                        text: `Confira minha cartinha e histórico no Rachador!`,
+                        files: [file]
+                    });
+                    showToast("Compartilhado com sucesso!", "success");
+                } catch (e) {
+                    if (e.name !== 'AbortError') {
+                        console.error("Compartilhamento nativo falhou:", e);
+                        downloadBlob(blob, fileName);
+                    }
+                }
+            } else {
+                // Fallback: Tenta copiar para área de transferência e faz o download automático
+                try {
+                    await navigator.clipboard.write([
+                        new ClipboardItem({ 'image/png': blob })
+                    ]);
+                    showToast("Imagem copiada para a área de transferência! Baixando arquivo...", "success");
+                } catch (e) {
+                    showToast("Formato não suportado. Baixando imagem...", "info");
+                }
+                downloadBlob(blob, fileName);
+            }
+        } else {
+            // Ação é download direta
+            downloadBlob(blob, fileName);
+            showToast("Imagem baixada com sucesso!", "success");
+        }
+        
+        if (overlay) {
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+        }
         
     } catch (e) {
-        console.error("Erro ao gerar imagem com html2canvas:", e);
+        console.error("Erro ao gerar imagem:", e);
         showToast("Erro ao gerar imagem.", "error");
         if (overlay) {
             overlay.classList.add('hidden');
