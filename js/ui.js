@@ -239,6 +239,18 @@ export const switchView = (view) => {
         if (mainNav) mainNav.classList.remove('hidden');
     }
 
+    // Controle do título "Rachador" na nav bar
+    const navBrandText = document.getElementById('navBrandText');
+    if (navBrandText) {
+        if (view === 'groups' || view === 'auth') {
+            navBrandText.classList.remove('hidden');
+            navBrandText.classList.add('block');
+        } else {
+            navBrandText.classList.remove('block');
+            navBrandText.classList.add('hidden');
+        }
+    }
+
     // 4. Mostra a view correta e ativa o botão correspondente
     if (view === 'public') { 
         document.getElementById('view-public').classList.remove('hidden-view'); 
