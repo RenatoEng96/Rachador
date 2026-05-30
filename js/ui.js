@@ -887,25 +887,25 @@ const prepareExportTemplates = (type, playerName, day) => {
     // 2. Apenas o Histórico
     if (type === 'history') {
         document.getElementById('shareableHistoryOnly').innerHTML = `
-            <div style="display: flex; flex-direction: column; height: 100%; justify-content: space-between; width: 100%; box-sizing: border-box;">
+            <div style="display: flex; flex-direction: column; min-height: 336px; justify-content: space-between; width: 100%; box-sizing: border-box; flex-grow: 1;">
                 <div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #334155; padding-bottom: 12px; margin-bottom: 16px;">
-                        <div>
-                            <h2 class="export-header-title" style="margin: 0; font-family: 'Oswald', sans-serif; text-transform: uppercase;">${activeGroupName}</h2>
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #334155; padding-bottom: 12px; margin-bottom: 16px; gap: 16px;">
+                        <div style="flex: 1; min-width: 0;">
+                            <h2 class="export-header-title" style="margin: 0; font-family: 'Oswald', sans-serif; text-transform: uppercase; word-wrap: break-word; overflow-wrap: break-word; font-size: 24px; line-height: 1.2;">${activeGroupName}</h2>
                             <p style="font-size: 10px; font-weight: bold; color: #64748b; margin: 2px 0 0 0; text-transform: uppercase; letter-spacing: 0.05em;">Histórico do Dia</p>
                         </div>
-                        <div style="text-align: right;">
+                        <div style="text-align: right; flex-shrink: 0;">
                             <h3 style="font-size: 18px; font-weight: 900; color: #fff; margin: 0; text-transform: uppercase; font-family: 'Oswald', sans-serif;">${playerName}</h3>
                             <p style="font-size: 11px; font-weight: bold; color: #22c55e; margin: 2px 0 0 0;">Partidas de ${day}</p>
                         </div>
                     </div>
                     
-                    <div style="max-height: 310px; overflow: hidden; padding-right: 4px;">
+                    <div style="padding-right: 4px; margin-bottom: 12px;">
                         ${matchesListHtml}
                     </div>
                 </div>
                 
-                <div style="display: flex; justify-content: space-between; align-items: center; border-t: 2px solid #334155; padding-top: 12px; margin-top: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-t: 2px solid #334155; padding-top: 12px; margin-top: 12px; flex-shrink: 0;">
                     <div>
                         <span class="export-watermark">rachador.app</span>
                     </div>
@@ -922,30 +922,30 @@ const prepareExportTemplates = (type, playerName, day) => {
     if (type === 'combined') {
         document.getElementById('shareableCombined').innerHTML = `
             <!-- Lado Esquerdo: Card -->
-            <div style="width: 230px; display: flex; justify-content: center; align-items: center; shrink-0; box-sizing: border-box;">
+            <div style="width: 230px; display: flex; justify-content: center; align-items: center; flex-shrink: 0; box-sizing: border-box;">
                 ${cardHtml}
             </div>
             
             <!-- Lado Direito: Histórico -->
-            <div style="flex: 1; display: flex; flex-direction: column; justify-content: space-between; height: 100%; box-sizing: border-box;">
+            <div style="flex: 1; display: flex; flex-direction: column; justify-content: space-between; min-height: 332px; box-sizing: border-box; flex-grow: 1; min-width: 0;">
                 <div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #334155; padding-bottom: 12px; margin-bottom: 16px;">
-                        <div>
-                            <h2 class="export-header-title" style="margin: 0; font-size: 24px; font-family: 'Oswald', sans-serif; text-transform: uppercase;">${activeGroupName}</h2>
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #334155; padding-bottom: 12px; margin-bottom: 16px; gap: 16px;">
+                        <div style="flex: 1; min-width: 0;">
+                            <h2 class="export-header-title" style="margin: 0; font-size: 24px; font-family: 'Oswald', sans-serif; text-transform: uppercase; word-wrap: break-word; overflow-wrap: break-word; line-height: 1.2;">${activeGroupName}</h2>
                             <span class="export-watermark">rachador.app</span>
                         </div>
-                        <div style="text-align: right;">
+                        <div style="text-align: right; flex-shrink: 0;">
                             <h3 style="font-size: 16px; font-weight: 900; color: #fff; margin: 0; text-transform: uppercase; font-family: 'Oswald', sans-serif;">${playerName}</h3>
                             <p style="font-size: 11px; font-weight: bold; color: #22c55e; margin: 2px 0 0 0;">Partidas de ${day}</p>
                         </div>
                     </div>
                     
-                    <div style="max-height: 220px; overflow: hidden; padding-right: 4px;">
+                    <div style="padding-right: 4px; margin-bottom: 12px;">
                         ${matchesListHtml}
                     </div>
                 </div>
                 
-                <div style="display: flex; justify-content: flex-end; align-items: center; border-t: 2px solid #334155; padding-top: 10px; margin-top: 10px;">
+                <div style="display: flex; justify-content: flex-end; align-items: center; border-t: 2px solid #334155; padding-top: 10px; margin-top: 10px; flex-shrink: 0;">
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <span style="font-size: 10px; font-weight: bold; color: #94a3b8; text-transform: uppercase;">Saldo do Dia:</span>
                         <span style="${dayEloColor} font-size: 14px; font-weight: 900; background: #0f172a; padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); font-family: 'Oswald', sans-serif;">${dayEloDisplay} ELO</span>
