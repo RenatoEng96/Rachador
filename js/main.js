@@ -8,7 +8,7 @@ import {
     forceUnlockPlacar, toggleAuthMode, renderUserGroups, setFormMode, renderAdminTable,
     openPlacarConfigModal, closePlacarConfigModal, savePlacarConfig, playBeepSound, goHome,
     openTermsModal, closeTermsModal, openPrivacyModal, closePrivacyModal,
-    openSupportModal, closeSupportModal, copySupportEmail
+    openSupportModal, closeSupportModal, copySupportEmail, filterUserGroups, setGroupRoleFilter
 } from './ui.js';
 import {
     drawTeams, createWaitlist, clearTeams, confirmMovePlayer, deleteTeam,
@@ -664,6 +664,7 @@ Object.assign(window, {
     // NOVOS BINDINGS DE SAAS:
     handleAuthAction, toggleAuthMode, handlePasswordReset, handleLogout, handleGoogleLogin, 
     handleCreateGroup, selectGroup, saveUserProfile, removeUserProfilePhoto, renderAdminTable, checkProfileChanges,
+    filterUserGroups, setGroupRoleFilter,
     // NOVOS BINDINGS DE PAGAMENTOS:
     setPaymentAdminTab, renderPaymentsView, savePaymentSettings, generateDailyCharges,
     toggleCaixaVisibility, addCaixaEntry, saveGeneralPaymentSettings, toggleBlockLatePlayersSection,
@@ -718,6 +719,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             // LIMPA O ESTADO E OS CAMPOS QUANDO O USUÁRIO FAZ LOGOUT (Evita que os dados vazem para o próximo login no mesmo celular)
             state.userProfile = null;
+            state.userGroups = [];
             const nameInput = document.getElementById('userProfileNameInput');
             if (nameInput) nameInput.value = '';
             
@@ -735,6 +737,15 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const btnRemove = document.getElementById('btnRemoveProfilePhoto');
             if (btnRemove) btnRemove.classList.add('hidden');
+
+            // Reseta os filtros de grupos na aba perfil
+            const searchInput = document.getElementById('searchGroupInput');
+            if (searchInput) searchInput.value = '';
+            if (typeof window.setGroupRoleFilter === 'function') {
+                window.setGroupRoleFilter('all');
+            } else {
+                window.currentGroupRoleFilter = 'all';
+            }
 
             checkProfileChanges();
             clearAllListeners();

@@ -1949,6 +1949,32 @@ export const toggleAuthMode = (mode) => {
     btnMain.setAttribute('data-mode', isRegister ? 'register' : 'login');
 };
 
+// Filtro global de grupos por cargo
+window.currentGroupRoleFilter = 'all';
+
+export const setGroupRoleFilter = (role) => {
+    window.currentGroupRoleFilter = role;
+    
+    // Atualiza o visual dos botões de filtro
+    const roles = ['all', 'admin', 'moderador', 'jogador'];
+    roles.forEach(r => {
+        const btn = document.getElementById(`btnFilterRole-${r}`);
+        if (btn) {
+            if (r === role) {
+                btn.className = "flex-1 sm:flex-none px-3.5 py-1.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all bg-blue-600 text-white shadow";
+            } else {
+                btn.className = "flex-1 sm:flex-none px-3.5 py-1.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all text-slate-400 hover:text-white hover:bg-slate-800/30";
+            }
+        }
+    });
+
+    renderUserGroups();
+};
+
+export const filterUserGroups = () => {
+    renderUserGroups();
+};
+
 export const renderUserGroups = () => {
     const grid = document.getElementById('userGroupsGrid');
     const msg = document.getElementById('noGroupsMessage');
@@ -1965,7 +1991,49 @@ export const renderUserGroups = () => {
     msg.classList.add('hidden');
     msg.classList.remove('flex');
 
-    grid.innerHTML = state.userGroups.map(group => {
+    // Filtragem de grupos por nome e cargo
+    const searchTerm = document.getElementById('searchGroupInput')?.value.trim().toLowerCase() || '';
+    const activeRole = window.currentGroupRoleFilter || 'all';
+
+    let filteredGroups = state.userGroups || [];
+
+    // 1. Filtro por Nome
+    if (searchTerm) {
+        filteredGroups = filteredGroups.filter(g => g.name && g.name.toLowerCase().includes(searchTerm));
+    }
+
+    // 2. Filtro por Cargo
+    if (activeRole !== 'all') {
+        filteredGroups = filteredGroups.filter(group => {
+            const isCreatorOrAdmin = state.isMaster || (group.adminUids && group.adminUids.includes(state.user?.uid));
+            const isModerator = group.moderatorEmails && group.moderatorEmails.includes(state.user?.email);
+            
+            if (activeRole === 'admin') {
+                return isCreatorOrAdmin;
+            } else if (activeRole === 'moderador') {
+                return isModerator;
+            } else if (activeRole === 'jogador') {
+                return !isCreatorOrAdmin && !isModerator;
+            }
+            return true;
+        });
+    }
+
+    if (filteredGroups.length === 0) {
+        grid.innerHTML = `
+            <div class="col-span-full flex flex-col items-center justify-center py-12 text-center">
+                <div class="bg-slate-800 p-4 rounded-full mb-4 border border-slate-700">
+                    <i data-lucide="search" class="w-10 h-10 text-slate-500"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white mb-1">Nenhum grupo encontrado</h3>
+                <p class="text-slate-400 text-sm max-w-xs">Não encontramos nenhum racha com o nome ou cargo selecionado.</p>
+            </div>
+        `;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        return;
+    }
+
+    grid.innerHTML = filteredGroups.map(group => {
         const isCreatorOrAdmin = state.isMaster || (group.adminUids && group.adminUids.includes(state.user?.uid));
         const isModerator = group.moderatorEmails && group.moderatorEmails.includes(state.user?.email);
         
