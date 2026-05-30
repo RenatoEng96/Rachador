@@ -837,6 +837,39 @@ const prepareExportTemplates = (type, playerName, day) => {
     const matches = currentGroupedMatches[day] || [];
     let dayEloChange = 0;
     
+    // Ajuste dinâmico de fontes e paddings com base na quantidade de partidas para evitar esticar excessivamente a imagem
+    const numMatches = matches.length;
+    let matchPadding = '10px';
+    let matchMargin = '8px';
+    let matchHeaderFontSize = '11px';
+    let matchHeaderPadding = '6px';
+    let matchHeaderMargin = '6px';
+    let teamFontSize = '13px';
+    let scoreFontSize = '14px';
+    let scorePadding = '0 16px';
+    
+    if (numMatches > 6) {
+        // Redução acentuada para muitas partidas (ex: 7 ou mais)
+        matchPadding = '6px';
+        matchMargin = '4px';
+        matchHeaderFontSize = '9px';
+        matchHeaderPadding = '3px';
+        matchHeaderMargin = '4px';
+        teamFontSize = '11px';
+        scoreFontSize = '11px';
+        scorePadding = '0 8px';
+    } else if (numMatches > 3) {
+        // Redução moderada para 4 a 6 partidas
+        matchPadding = '8px';
+        matchMargin = '6px';
+        matchHeaderFontSize = '10px';
+        matchHeaderPadding = '4px';
+        matchHeaderMargin = '5px';
+        teamFontSize = '12px';
+        scoreFontSize = '12px';
+        scorePadding = '0 12px';
+    }
+    
     const matchesListHtml = matches.map(m => {
         const inT1 = m.team1.players && m.team1.players.includes(playerName);
         const myTeam = inT1 ? 1 : 2;
@@ -859,14 +892,14 @@ const prepareExportTemplates = (type, playerName, day) => {
         const statusLabel = isTieMatch ? 'EMPATE' : (isWin ? 'VITÓRIA' : 'DERROTA');
 
         return `
-            <div style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(71, 85, 105, 0.3); border-radius: 12px; padding: 10px; margin-bottom: 8px; box-sizing: border-box;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; border-bottom: 1px solid rgba(71, 85, 105, 0.2); padding-bottom: 6px; font-size: 11px;">
-                    <span style="font-weight: bold; color: #94a3b8; text-transform: uppercase;">${m.team1.name} vs ${m.team2.name}</span>
-                    <span style="${eloColor} font-weight: 900; background: #0f172a; padding: 2px 8px; border-radius: 6px;">${statusLabel} (${myEloDisplay} ELO)</span>
+            <div style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(71, 85, 105, 0.3); border-radius: 12px; padding: ${matchPadding}; margin-bottom: ${matchMargin}; box-sizing: border-box;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: ${matchHeaderMargin}; border-bottom: 1px solid rgba(71, 85, 105, 0.2); padding-bottom: ${matchHeaderPadding}; font-size: ${matchHeaderFontSize};">
+                    <span style="font-weight: bold; color: #94a3b8; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;">${m.team1.name} vs ${m.team2.name}</span>
+                    <span style="${eloColor} font-weight: 900; background: #0f172a; padding: 2px 8px; border-radius: 6px; white-space: nowrap; flex-shrink: 0;">${statusLabel} (${myEloDisplay} ELO)</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: bold;">
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: ${teamFontSize}; font-weight: bold; gap: 4px;">
                     <span style="${t1Color} flex: 1; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${m.team1.name}</span>
-                    <span style="padding: 0 16px; font-size: 14px; font-weight: 900; color: #fff; font-family: 'Oswald', sans-serif;">${m.team1.score} x ${m.team2.score}</span>
+                    <span style="padding: ${scorePadding}; font-size: ${scoreFontSize}; font-weight: 900; color: #fff; font-family: 'Oswald', sans-serif; white-space: nowrap; flex-shrink: 0; text-align: center;">${m.team1.score} x ${m.team2.score}</span>
                     <span style="${t2Color} flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${m.team2.name}</span>
                 </div>
             </div>
@@ -892,11 +925,11 @@ const prepareExportTemplates = (type, playerName, day) => {
                     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #334155; padding-bottom: 12px; margin-bottom: 16px; gap: 16px;">
                         <div style="flex: 1; min-width: 0;">
                             <h2 class="export-header-title" style="margin: 0; font-family: 'Oswald', sans-serif; text-transform: uppercase; word-wrap: break-word; overflow-wrap: break-word; font-size: 24px; line-height: 1.2;">${activeGroupName}</h2>
-                            <p style="font-size: 10px; font-weight: bold; color: #64748b; margin: 2px 0 0 0; text-transform: uppercase; letter-spacing: 0.05em;">Histórico do Dia</p>
+                            <p style="font-size: 10px; font-weight: bold; color: #64748b; margin: 2px 0 0 0; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Histórico do Dia</p>
                         </div>
                         <div style="text-align: right; flex-shrink: 0;">
-                            <h3 style="font-size: 18px; font-weight: 900; color: #fff; margin: 0; text-transform: uppercase; font-family: 'Oswald', sans-serif;">${playerName}</h3>
-                            <p style="font-size: 11px; font-weight: bold; color: #22c55e; margin: 2px 0 0 0;">Partidas de ${day}</p>
+                            <h3 style="font-size: 18px; font-weight: 900; color: #fff; margin: 0; text-transform: uppercase; font-family: 'Oswald', sans-serif; white-space: nowrap;">${playerName}</h3>
+                            <p style="font-size: 11px; font-weight: bold; color: #22c55e; margin: 2px 0 0 0; white-space: nowrap;">Partidas de ${day}</p>
                         </div>
                     </div>
                     
@@ -905,13 +938,13 @@ const prepareExportTemplates = (type, playerName, day) => {
                     </div>
                 </div>
                 
-                <div style="display: flex; justify-content: space-between; align-items: center; border-t: 2px solid #334155; padding-top: 12px; margin-top: 12px; flex-shrink: 0;">
-                    <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-t: 2px solid #334155; padding-top: 12px; margin-top: 12px; flex-shrink: 0; white-space: nowrap; gap: 8px;">
+                    <div style="flex-shrink: 0;">
                         <span class="export-watermark">rachador.app</span>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <span style="font-size: 11px; font-weight: bold; color: #94a3b8; text-transform: uppercase;">Saldo do Dia:</span>
-                        <span style="${dayEloColor} font-size: 16px; font-weight: 900; background: #0f172a; padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); font-family: 'Oswald', sans-serif;">${dayEloDisplay} ELO</span>
+                    <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0; white-space: nowrap;">
+                        <span style="font-size: 11px; font-weight: bold; color: #94a3b8; text-transform: uppercase; white-space: nowrap;">Saldo do Dia:</span>
+                        <span style="${dayEloColor} font-size: 16px; font-weight: 900; background: #0f172a; padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); font-family: 'Oswald', sans-serif; white-space: nowrap; flex-shrink: 0;">${dayEloDisplay} ELO</span>
                     </div>
                 </div>
             </div>
@@ -932,11 +965,11 @@ const prepareExportTemplates = (type, playerName, day) => {
                     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #334155; padding-bottom: 12px; margin-bottom: 16px; gap: 16px;">
                         <div style="flex: 1; min-width: 0;">
                             <h2 class="export-header-title" style="margin: 0; font-size: 24px; font-family: 'Oswald', sans-serif; text-transform: uppercase; word-wrap: break-word; overflow-wrap: break-word; line-height: 1.2;">${activeGroupName}</h2>
-                            <span class="export-watermark">rachador.app</span>
+                            <span class="export-watermark" style="white-space: nowrap;">rachador.app</span>
                         </div>
                         <div style="text-align: right; flex-shrink: 0;">
-                            <h3 style="font-size: 16px; font-weight: 900; color: #fff; margin: 0; text-transform: uppercase; font-family: 'Oswald', sans-serif;">${playerName}</h3>
-                            <p style="font-size: 11px; font-weight: bold; color: #22c55e; margin: 2px 0 0 0;">Partidas de ${day}</p>
+                            <h3 style="font-size: 16px; font-weight: 900; color: #fff; margin: 0; text-transform: uppercase; font-family: 'Oswald', sans-serif; white-space: nowrap;">${playerName}</h3>
+                            <p style="font-size: 11px; font-weight: bold; color: #22c55e; margin: 2px 0 0 0; white-space: nowrap;">Partidas de ${day}</p>
                         </div>
                     </div>
                     
@@ -945,10 +978,10 @@ const prepareExportTemplates = (type, playerName, day) => {
                     </div>
                 </div>
                 
-                <div style="display: flex; justify-content: flex-end; align-items: center; border-t: 2px solid #334155; padding-top: 10px; margin-top: 10px; flex-shrink: 0;">
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <span style="font-size: 10px; font-weight: bold; color: #94a3b8; text-transform: uppercase;">Saldo do Dia:</span>
-                        <span style="${dayEloColor} font-size: 14px; font-weight: 900; background: #0f172a; padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); font-family: 'Oswald', sans-serif;">${dayEloDisplay} ELO</span>
+                <div style="display: flex; justify-content: flex-end; align-items: center; border-t: 2px solid #334155; padding-top: 10px; margin-top: 10px; flex-shrink: 0; white-space: nowrap; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0; white-space: nowrap;">
+                        <span style="font-size: 10px; font-weight: bold; color: #94a3b8; text-transform: uppercase; white-space: nowrap;">Saldo do Dia:</span>
+                        <span style="${dayEloColor} font-size: 14px; font-weight: 900; background: #0f172a; padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); font-family: 'Oswald', sans-serif; white-space: nowrap; flex-shrink: 0;">${dayEloDisplay} ELO</span>
                     </div>
                 </div>
             </div>
