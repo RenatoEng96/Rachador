@@ -685,6 +685,19 @@ export const savePlacarConfig = async () => {
 
 export const playBeepSound = () => {
     try {
+        const audio = new Audio('Apito.wav');
+        audio.play().catch(err => {
+            console.warn("Could not play Apito.wav, falling back to synthesizer beeps:", err);
+            playSynthesizedBeep();
+        });
+    } catch (e) {
+        console.warn("Audio element failed, falling back to synthesizer:", e);
+        playSynthesizedBeep();
+    }
+};
+
+const playSynthesizedBeep = () => {
+    try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         
         const playOsc = (timeOffset, duration) => {

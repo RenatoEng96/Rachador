@@ -1,9 +1,10 @@
-const CACHE_NAME = 'rachador-pwa-v3';
+const CACHE_NAME = 'rachador-pwa-v4';
 const urlsToCache = [
   '/',
   '/index.html',
   '/css/styles.css',
-  '/Icone.png'
+  '/Icone.png',
+  '/Apito.wav'
 ];
 
 self.addEventListener('install', event => {
