@@ -367,11 +367,7 @@ export const saveAndCloseVictoryModal = async () => {
         return;
     }
 
-    // Trava de segurança: impede salvamento duplo
-    if (state.score1 === 0 && state.score2 === 0) {
-        showToast("Esta partida já foi encerrada.", "warning");
-        return;
-    }
+
 
     const { changeT1, changeT2, team1, team2, isTeam1Winner } = previewData;
     const btnSave = document.getElementById('btnSaveResult');

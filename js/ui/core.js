@@ -82,12 +82,15 @@ export const updateLiveEloPreview = () => {
     
     // Chama o serviço puramente matemático
     const matchPreview = calculateEloMatch(eloT1, eloT2);
-    const isFutebol = (state.matchConfig.sportMode || 'volei') === 'futebol';
-    // Futebol: empate pode ocorrer inclusive no 0x0. Vôlei: empate nunca ocorre.
-    const isTie = isFutebol && state.score1 === state.score2;
+    const sportMode = state.matchConfig.sportMode || 'volei';
+    const isFutebol = sportMode === 'futebol';
+    const isBasquete = sportMode === 'basquete';
+    const isTieAllowed = isFutebol || isBasquete;
+    // Futebol/Basquete: empate pode ocorrer inclusive no 0x0. Vôlei: empate nunca ocorre.
+    const isTie = isTieAllowed && state.score1 === state.score2;
 
-    if (isFutebol) {
-        // Futebol: sempre mostra vitória, derrota E empate de cada lado
+    if (isTieAllowed) {
+        // Futebol/Basquete: sempre mostra vitória, derrota E empate de cada lado
         const drawT1Sign = matchPreview.drawT1 >= 0 ? '+' : '';
         const drawT2Sign = matchPreview.drawT2 >= 0 ? '+' : '';
         const drawT1Color = matchPreview.drawT1 > 0 ? 'text-green-400' : (matchPreview.drawT1 < 0 ? 'text-red-400' : 'text-slate-400');
