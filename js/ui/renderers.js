@@ -391,7 +391,7 @@ export const renderTeams = () => {
     const maxElo = state.players.length > 0 ? Math.max(...state.players.map(p => p.eloRating ?? 0)) : 0;
     
     const content = sortedTeams.map(t => {
-        const teamName = t.isWaitlist ? '<i data-lucide="clock" class="inline w-4 h-4 mr-1"></i> Lista de Espera' : getTeamName(t);
+        const teamName = t.isWaitlist ? '<i data-lucide="clock" class="inline w-4 h-4 mr-1"></i> Time Fora' : getTeamName(t);
         const pSorted = [...t.players].sort((a,b) => { 
             const c = (parseInt(b.categoria)||1) - (parseInt(a.categoria)||1); 
             if(c !== 0) return c; 
@@ -399,7 +399,7 @@ export const renderTeams = () => {
         });
         
         const controlsHTML = !t.isWaitlist ? `
-            <div class="absolute top-3 right-3 flex gap-1">
+            <div class="flex gap-1 shrink-0">
                 <button onclick="redrawTeamWithWaitlist('${t.id}')" class="p-1.5 flex items-center gap-1 text-[10px] font-black rounded-lg border border-blue-500/30 bg-blue-500/10 text-blue-400 transition-colors hover:bg-blue-500/20" title="Substituir Pela Espera">
                     <i data-lucide="refresh-cw" class="w-3 h-3"></i>
                     <span>Mesclar com Time Fora</span>
@@ -408,12 +408,12 @@ export const renderTeams = () => {
                     <i data-lucide="trash-2" class="w-3 h-3"></i>
                 </button>
             </div>` : `
-            <div class="absolute top-3 right-3 flex gap-1">
+            <div class="flex gap-1 shrink-0">
                 <button onclick="promoteWaitlistToTeam('${t.id}')" class="p-1.5 flex items-center gap-1 text-[10px] font-black rounded-lg border border-green-500/30 bg-green-500/10 text-green-400 transition-colors hover:bg-green-500/20" title="Formar Novo Time com a Espera">
                     <i data-lucide="arrow-up-circle" class="w-3 h-3"></i>
                     <span>Montar Time</span>
                 </button>
-                <button onclick="deleteTeam('${t.id}')" class="p-1.5 rounded-lg border border-red-500/30 bg-red-500/10 text-red-500 transition-colors hover:bg-red-500/20" title="Excluir Lista de Espera">
+                <button onclick="deleteTeam('${t.id}')" class="p-1.5 rounded-lg border border-red-500/30 bg-red-500/10 text-red-500 transition-colors hover:bg-red-500/20" title="Excluir Time Fora">
                     <i data-lucide="trash-2" class="w-3 h-3"></i>
                 </button>
             </div>`;
@@ -453,10 +453,23 @@ export const renderTeams = () => {
                 </div>`;
         }).join('');
 
+        const cleanTeamName = teamName.replace(/<[^>]*>/g, '').trim();
+        const teamNameLength = cleanTeamName.length;
+        let fontSizeClass = 'text-base';
+        if (teamNameLength > 20) {
+            fontSizeClass = 'text-[10px] sm:text-xs';
+        } else if (teamNameLength > 15) {
+            fontSizeClass = 'text-xs sm:text-sm';
+        } else if (teamNameLength > 10) {
+            fontSizeClass = 'text-sm sm:text-base';
+        }
+
         return `
             <div class="team-container w-full p-4 rounded-xl border relative shadow-lg ${t.isWaitlist ? 'bg-slate-800/40 border-slate-600' : 'border-slate-700 bg-slate-800/80'}">
-                ${controlsHTML}
-                <h3 class="font-bold ${t.isWaitlist ? 'text-slate-400' : 'text-green-500'} text-base mb-3 uppercase max-w-[40%] truncate">${teamName}</h3>
+                <div class="flex justify-between items-center gap-2 mb-3 w-full min-w-0">
+                    <h3 class="font-bold ${t.isWaitlist ? 'text-slate-400' : 'text-green-500'} ${fontSizeClass} uppercase truncate min-w-0 flex-1 leading-tight" title="${cleanTeamName}">${teamName}</h3>
+                    ${controlsHTML}
+                </div>
                 <div class="space-y-2 mt-2">
                     ${playersHTML}
                 </div>

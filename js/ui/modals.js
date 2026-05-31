@@ -40,7 +40,7 @@ export const openMoveModal = (teamId, playerId) => {
     
     sortedTeams.forEach(t => {
         if (t.id !== teamId) {
-            options += `<option value="${t.id}">${t.isWaitlist ? "Lista de Espera" : getTeamName(t)}</option>`;
+            options += `<option value="${t.id}">${t.isWaitlist ? "Time Fora" : getTeamName(t)}</option>`;
         }
     });
     

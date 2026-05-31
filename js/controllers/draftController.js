@@ -113,7 +113,7 @@ export const drawTeams = async () => {
                     return a.name.localeCompare(b.name);
                 });
                 await addDoc(teamsRef, { label: 'DE FORA', isWaitlist: true, players: sortedWaitlist });
-                showToast(`Sorteio concluído! ${result.waitlist.length} atleta(s) na espera.`);
+                showToast(`Sorteio concluído! ${result.waitlist.length} atleta(s) no Time Fora.`);
             } else { 
                 showToast("Equipes perfeitamente equilibradas geradas!"); 
             }
@@ -129,7 +129,7 @@ export const drawTeams = async () => {
 // ============================================================================
 
 export const createWaitlist = () => {
-    openConfirmModal("Atualizar Lista de Espera", "Os atletas selecionados (que não estejam em times) formarão a nova lista de espera. Deseja continuar?", async () => {
+    openConfirmModal("Atualizar Time Fora", "Os atletas selecionados (que não estejam em times) formarão o novo Time Fora. Deseja continuar?", async () => {
         try {
             const waitlistTeamDoc = state.drawnTeams.find(t => t.isWaitlist);
             const normalTeams = state.drawnTeams.filter(t => !t.isWaitlist);
@@ -177,10 +177,10 @@ export const createWaitlist = () => {
                 await addDoc(teamsRef, { label: 'DE FORA', isWaitlist: true, players: updatedWaitlist });
             }
             
-            showToast("Lista de espera atualizada com sucesso!", "success");
+            showToast("Time Fora atualizado com sucesso!", "success");
         } catch (e) {
             console.error(e);
-            showToast("Erro ao atualizar a lista de espera.", "error");
+            showToast("Erro ao atualizar o Time Fora.", "error");
         }
     });
 };
@@ -324,14 +324,14 @@ export const deleteTeam = (id) => {
     if (!teamToDelete) return;
 
     const modalMsg = teamToDelete.isWaitlist 
-        ? "Deseja remover a lista de espera do sorteio?" 
-        : "Deseja desmanchar esta equipe? Os jogadores serão enviados para a lista de espera.";
+        ? "Deseja remover o Time Fora do sorteio?" 
+        : "Deseja desmanchar esta equipe? Os jogadores serão enviados para o Time Fora.";
 
     openConfirmModal("Remover Equipe", modalMsg, async () => {
         try { 
             if (teamToDelete.isWaitlist) {
                 await deleteDoc(doc(teamsRef, id)); 
-                showToast("Lista de espera removida.", "info"); 
+                showToast("Time Fora removido.", "info"); 
             } else {
                 const waitlistTeam = state.drawnTeams.find(t => t.isWaitlist);
                 const playersToMove = teamToDelete.players.map(p => ({ ...p, waitlistRounds: 0 }));
@@ -354,7 +354,7 @@ export const deleteTeam = (id) => {
                 }
 
                 await Promise.all(updates);
-                showToast("Equipe desfeita! Jogadores na espera.", "info");
+                showToast("Equipe desfeita! Jogadores no Time Fora.", "info");
             }
         } catch (e) { 
             console.error(e);
@@ -380,7 +380,7 @@ export const redrawTeamWithWaitlist = async (teamId) => {
         return;
     }
     
-    openConfirmModal("Sorteio de Substituições", "Deseja substituir este time considerando as prioridades da lista de espera?", async () => {
+    openConfirmModal("Sorteio de Substituições", "Deseja substituir este time considerando as prioridades do Time Fora?", async () => {
         const targetTeamDoc = state.drawnTeams.find(t => t.id === teamId);
         if (!targetTeamDoc) return;
 
@@ -560,7 +560,7 @@ export const promoteWaitlistToTeam = async (waitlistTeamId) => {
         return;
     }
 
-    openConfirmModal("Promover Lista de Espera", "Deseja criar um novo time equilibrado usando os jogadores da lista de espera?", async () => {
+    openConfirmModal("Promover Time Fora", "Deseja criar um novo time equilibrado usando os jogadores do Time Fora?", async () => {
         const waitlistDoc = state.drawnTeams.find(t => t.id === waitlistTeamId && t.isWaitlist);
         if (!waitlistDoc) return;
 
@@ -568,7 +568,7 @@ export const promoteWaitlistToTeam = async (waitlistTeamId) => {
         const N = sizeInput ? parseInt(sizeInput.value) || 4 : 4;
 
         if (waitlistDoc.players.length < N) {
-            showToast(`A lista precisa ter pelo menos ${N} jogadores.`, "warning");
+            showToast(`O Time Fora precisa ter pelo menos ${N} jogadores.`, "warning");
             return;
         }
 
@@ -645,7 +645,7 @@ export const promoteWaitlistToTeam = async (waitlistTeamId) => {
             } else {
                 await deleteDoc(doc(teamsRef, waitlistDoc.id));
             }
-            showToast("Nova equipe formada a partir da espera!", "success");
-        } catch (e) { console.error(e); showToast("Erro ao promover lista de espera.", "error"); }
+            showToast("Nova equipe formada a partir do Time Fora!", "success");
+        } catch (e) { console.error(e); showToast("Erro ao promover o Time Fora.", "error"); }
     });
 };
