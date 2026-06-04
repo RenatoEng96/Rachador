@@ -9,7 +9,7 @@ import { domToBlob } from 'https://unpkg.com/modern-screenshot?module';
 // HELPERS DE FORMATAÇÃO VISUAL
 // ============================================================================
 
-export const getLevelInfo = (elo) => {
+export const getEloInfo = (elo) => {
     const e = elo ?? 0;
     if (e < 100) return { type: 'nivel1', label: 'BRONZE', bg: 'bg-orange-900/40', text: 'text-orange-400', dot: 'bg-orange-500' };
     if (e < 200) return { type: 'nivel2', label: 'PRATA', bg: 'bg-slate-500/20', text: 'text-slate-400', dot: 'bg-slate-400' };
@@ -56,7 +56,7 @@ const getStarArrangement = (stars) => {
     return `<div class="relative w-5 h-5 mx-auto inline-block align-middle">${starsHtml}</div>`;
 };
 
-export const getCategoryInfo = (cat) => {
+export const getLevelInfo = (cat) => {
     const c = parseInt(cat) || 1;
     const noBg = '!bg-transparent !p-0 !m-0 !border-0';
     if (c === 5) return { label: getStarArrangement(5), bg: noBg, text: 'text-indigo-400', border: noBg, dot: 'bg-indigo-500' };

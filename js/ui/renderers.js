@@ -1,4 +1,4 @@
-import { toggleDraftMode, getLevelInfo, getCategoryInfo, getTeamName, getDailyPlayerStats, openMoveModal, showToast, switchView, openConfirmModal, closeConfirmModal, closeVictoryModalOnly, closeMoveModal, closePlayerHistoryModal, updateLiveEloPreview, updateSorteioCounters, changeHistoryPage, openPlayerHistoryModal, exportPlayerHistory, setFormMode, editPlayer, resetForm, toggleAuthMode, setGroupRoleFilter, filterUserGroups, renderUserGroups, renderAll, openPlacarConfigModal, closePlacarConfigModal, savePlacarConfig, playBeepSound, goHome, openTermsModal, closeTermsModal, openPrivacyModal, closePrivacyModal, openSupportModal, closeSupportModal, copySupportEmail } from '../ui.js';
+import { toggleDraftMode, getEloInfo, getLevelInfo, getTeamName, getDailyPlayerStats, openMoveModal, showToast, switchView, openConfirmModal, closeConfirmModal, closeVictoryModalOnly, closeMoveModal, closePlayerHistoryModal, updateLiveEloPreview, updateSorteioCounters, changeHistoryPage, openPlayerHistoryModal, exportPlayerHistory, setFormMode, editPlayer, resetForm, toggleAuthMode, setGroupRoleFilter, filterUserGroups, renderUserGroups, renderAll, openPlacarConfigModal, closePlacarConfigModal, savePlacarConfig, playBeepSound, goHome, openTermsModal, closeTermsModal, openPrivacyModal, closePrivacyModal, openSupportModal, closeSupportModal, copySupportEmail } from '../ui.js';
 
 import { state } from '../state.js';
 import { calculateEloMatch } from '../services/rankingService.js';
@@ -31,7 +31,7 @@ export const renderPublic = () => {
         if (list.length === 0) return '';
         
         const cardsHTML = list.map(p => {
-            const lvlInfo = getLevelInfo(p.eloRating ?? 0);
+            const lvlInfo = getEloInfo(p.eloRating ?? 0);
             const ptsValue = p.eloRating ?? 0;
             const isDestaque = ptsValue === maxElo && maxElo > 0;
             const vitorias = p.vitorias || 0;
@@ -254,8 +254,8 @@ export const renderSorteioTable = () => {
     });
     
     tbody.innerHTML = sorted.map(p => {
-        const lvlInfo = getLevelInfo(p.eloRating ?? 0);
-        const catInfo = getCategoryInfo(p.categoria);
+        const lvlInfo = getEloInfo(p.eloRating ?? 0);
+        const catInfo = getLevelInfo(p.categoria);
         
         // Bloqueio por atraso de pagamento
         const lateCharges = getPlayerLateChargesCount(p);
@@ -333,8 +333,8 @@ export const renderAdminTable = () => {
     });
     
     tbody.innerHTML = sorted.map(p => {
-        const lvlInfo = getLevelInfo(p.eloRating ?? 0);
-        const catInfo = getCategoryInfo(p.categoria);
+        const lvlInfo = getEloInfo(p.eloRating ?? 0);
+        const catInfo = getLevelInfo(p.categoria);
         
         return `
             <tr class="hover:bg-slate-700/30 transition-colors">
@@ -393,9 +393,16 @@ export const renderTeams = () => {
     
     const content = sortedTeams.map(t => {
         const teamName = t.isWaitlist ? '<i data-lucide="clock" class="inline w-4 h-4 mr-1"></i> Time Fora' : getTeamName(t);
+        const mode = document.getElementById('draftMode')?.value || 'balanceado';
+        const useElo = mode === 'balanceado_elo';
         const pSorted = [...t.players].sort((a,b) => { 
-            const c = (parseInt(b.categoria)||1) - (parseInt(a.categoria)||1); 
-            if(c !== 0) return c; 
+            if (useElo) {
+                const eloDiff = (b.eloRating ?? 0) - (a.eloRating ?? 0);
+                if (eloDiff !== 0) return eloDiff;
+            } else {
+                const c = (parseInt(b.categoria)||1) - (parseInt(a.categoria)||1); 
+                if(c !== 0) return c; 
+            }
             return a.name.localeCompare(b.name); 
         });
         
@@ -421,7 +428,7 @@ export const renderTeams = () => {
 
         const playersHTML = pSorted.map(p => {
             const dbPlayer = state.players.find(x => x.id === p.id) || p;
-            const catInfo = getCategoryInfo(dbPlayer.categoria);
+            const catInfo = getLevelInfo(dbPlayer.categoria);
             const ptsValue = dbPlayer.eloRating ?? 0;
             
             const pStats = stats[dbPlayer.name] || { wins: 0, losses: 0 };

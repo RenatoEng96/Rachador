@@ -17,9 +17,9 @@ O **Rachador** é uma plataforma SaaS premium e moderna desenvolvida para revolu
 *   **Autenticação Avançada:** Login seguro via E-mail/Senha com recuperação ou login rápido com Google.
 
 ### ⚖️ Algoritmo de Sorteio Inteligente & Balanceamento
-*   **Balanceamento por Categoria (Elo):** Sorteador avançado que nivela tecnicamente as equipes, distribuindo os jogadores com base em seu Elo individual para gerar partidas perfeitamente equilibradas.
+*   **Balanceamento por Nível ou Elo:** Sorteadores avançados que nivelam tecnicamente as equipes, distribuindo os jogadores com base em seu Nível (estrelas de 1 a 5) ou Elo individual (Pontos) para gerar partidas perfeitamente equilibradas.
 *   **Estratégias de Draft Personalizadas:**
-    *   *Fora Forte / Dentro Forte:* Define se o balanceamento rigoroso prioriza a quadra atual ou as substituições da lista de espera.
+    *   *Fora Forte / Dentro Forte:* Define se o balanceamento rigoroso prioriza a quadra atual ou as substituições da lista de espera, suportado nos modos de Nível e Elo.
     *   *Sorteio Customizado:* Escolha o tamanho dos times (2x2, 4x4, 6x6) e estratégias de preenchimento.
 *   **Gestão de Fila ("Time Fora"):** Controle de rotatividade que calcula as "rodadas fora" de cada jogador para que ninguém fique excessivamente tempo sem jogar, priorizando de forma justa quem está aguardando há mais tempo.
 
@@ -31,7 +31,7 @@ O **Rachador** é uma plataforma SaaS premium e moderna desenvolvida para revolu
 *   **Suporte a Empates:** Suporta o salvamento de partidas terminadas em empate em jogos de cronômetro, processando e recalculando o Elo de forma justa para ambos os times.
 
 ### 🏆 FIFA-Style Ultimate Team Cards & Estatísticas
-*   **Cartinhas Dinâmicas (FUT Style):** Cada atleta possui um card estilizado que destaca visualmente seu nível (Categoria), Elo competitivo, pontuações e histórico de desempenho recente.
+*   **Cartinhas Dinâmicas (FUT Style):** Cada atleta possui um card estilizado que destaca visualmente seu Nível (1-5 estrelas), Elo competitivo (Pontos), pontuações e histórico de desempenho recente.
 *   **Histórico e Estatísticas Detalhadas:** Histórico completo de vitórias, derrotas, empates, sequências de vitórias (*streaks*) e gráficos de variação de Elo.
 *   **Gerador de Imagens Integrado:** Exportação em altíssima qualidade (utilizando `html2canvas`) do card do jogador, do histórico recente ou da visualização combinada para compartilhamento direto no WhatsApp, Instagram e redes sociais.
 
@@ -79,7 +79,7 @@ Abaixo está o mapeamento dos principais módulos que sustentam a aplicação:
 │   ├── public.html             # Painel do Ranking Principal e Cartas de Jogadores
 │   ├── sorteio.html            # Interface de sorteio, parâmetros de draft e lista de espera
 │   ├── placar.html             # Placar dinâmico, cronômetro e projeção de ELO
-│   ├── admin.html              # Cadastro de Atletas, edição de categorias e regras do racha
+│   ├── admin.html              # Cadastro de Atletas, edição de níveis e regras do racha
 │   ├── pagamentos.html         # Painel Financeiro, cobranças diárias, PIX e caixa do time
 │   └── modals.html             # Popups (Vitória, Termos, Detalhes de Jogador, Mover Atleta)
 ├── js/
@@ -154,7 +154,7 @@ Caso deseje implantar o seu próprio ambiente do Rachador, siga estes passos par
 ## 💡 Guia de Uso Rápido para Administradores
 
 1.  **Criar Conta e Racha:** Faça o cadastro e clique em "Criar Novo Grupo". Dê um nome ao seu racha.
-2.  **Cadastrar Jogadores:** Vá na aba **Admin**, cadastre os jogadores do seu grupo, defina a categoria inicial e o e-mail de cada um.
+2.  **Cadastrar Jogadores:** Vá na aba **Admin**, cadastre os jogadores do seu grupo, defina o nível inicial (estrelas) e o e-mail de cada um.
 3.  **Sorteio Perfeito:** Na aba **Sorteio**, marque os atletas presentes para a rodada do dia, escolha o número de jogadores por time, defina a estratégia de nivelamento e clique em **Sortear Equipes**.
 4.  **Partida e Placar:** Na aba **Placar**, selecione os times gerados que irão entrar em quadra e dê início ao timer ou faça o controle manual dos pontos.
 5.  **Histórico & Elo:** Assim que a partida terminar, salve o resultado oficial. O sistema irá recalcular o Elo Rating de todos os participantes instantaneamente, atualizar o ranking e adicionar a partida ao Histórico.

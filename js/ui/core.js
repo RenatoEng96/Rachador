@@ -1,4 +1,4 @@
-import { getLevelInfo, getCategoryInfo, getTeamName, getDailyPlayerStats, openMoveModal, showToast, switchView, openConfirmModal, closeConfirmModal, closeVictoryModalOnly, closeMoveModal, closePlayerHistoryModal, updateSorteioCounters, changeHistoryPage, openPlayerHistoryModal, exportPlayerHistory, renderPublic, renderRanking, getNextDueDate, getPlayerLateChargesCount, renderSorteioTable, renderAdminTable, renderTeams, renderPlacarTeams, renderMatchHistory, togglePlacarLock, forceUnlockPlacar } from '../ui.js';
+import { getEloInfo, getLevelInfo, getTeamName, getDailyPlayerStats, openMoveModal, showToast, switchView, openConfirmModal, closeConfirmModal, closeVictoryModalOnly, closeMoveModal, closePlayerHistoryModal, updateSorteioCounters, changeHistoryPage, openPlayerHistoryModal, exportPlayerHistory, renderPublic, renderRanking, getNextDueDate, getPlayerLateChargesCount, renderSorteioTable, renderAdminTable, renderTeams, renderPlacarTeams, renderMatchHistory, togglePlacarLock, forceUnlockPlacar } from '../ui.js';
 
 import { state } from '../state.js';
 import { calculateEloMatch } from '../services/rankingService.js';
@@ -23,7 +23,7 @@ export const toggleDraftMode = () => {
             btnDrawTeams.className = "flex-[2] sm:flex-none bg-blue-500 hover:bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-black flex items-center justify-center gap-2 transition-colors h-full";
         }
     } else {
-        if (draftMode === 'balanceado') {
+        if (draftMode === 'balanceado' || draftMode === 'balanceado_elo') {
             if (draftStrategy) draftStrategy.classList.remove('hidden');
         } else {
             if (draftStrategy) draftStrategy.classList.add('hidden');

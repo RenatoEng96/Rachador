@@ -83,10 +83,14 @@ export const drawTeams = async () => {
     let result;
     if (mode === 'aleatorio') {
         result = drawRandom(activePlayers, size);
+    } else if (mode === 'balanceado_elo') {
+        result = strategy === 'FORA' 
+            ? balanceStrongOutside(activePlayers, size, true) 
+            : balanceStrongInside(activePlayers, size, true);
     } else {
         result = strategy === 'FORA' 
-            ? balanceStrongOutside(activePlayers, size) 
-            : balanceStrongInside(activePlayers, size);
+            ? balanceStrongOutside(activePlayers, size, false) 
+            : balanceStrongInside(activePlayers, size, false);
     }
 
     openConfirmModal("Sorteio Geral", "Todas as equipes atuais serão desfeitas e os contadores zerados.", async () => {
@@ -95,23 +99,27 @@ export const drawTeams = async () => {
             const deletePromises = state.drawnTeams.map(t => deleteDoc(doc(teamsRef, t.id)));
             await Promise.all(deletePromises);
             
-            // 2. Salva as novas equipes
-            for (let i = 0; i < result.teams.length; i++) {
-                let sortedTeam = result.teams[i].sort((a, b) => {
+            const useElo = mode === 'balanceado_elo';
+            const sortFn = (a, b) => {
+                if (useElo) {
+                    const eloDiff = (b.eloRating ?? 0) - (a.eloRating ?? 0);
+                    if (eloDiff !== 0) return eloDiff;
+                } else {
                     const catDiff = (parseInt(b.categoria) || 1) - (parseInt(a.categoria) || 1);
                     if (catDiff !== 0) return catDiff;
-                    return a.name.localeCompare(b.name); 
-                });
+                }
+                return a.name.localeCompare(b.name);
+            };
+            
+            // 2. Salva as novas equipes
+            for (let i = 0; i < result.teams.length; i++) {
+                let sortedTeam = result.teams[i].sort(sortFn);
                 await addDoc(teamsRef, { label: (i + 1).toString(), players: sortedTeam });
             }
             
             // 3. Salva a lista de espera (se houver)
             if (result.waitlist.length > 0) {
-                let sortedWaitlist = result.waitlist.sort((a, b) => {
-                    const catDiff = (parseInt(b.categoria) || 1) - (parseInt(a.categoria) || 1);
-                    if (catDiff !== 0) return catDiff;
-                    return a.name.localeCompare(b.name);
-                });
+                let sortedWaitlist = result.waitlist.sort(sortFn);
                 await addDoc(teamsRef, { label: 'DE FORA', isWaitlist: true, players: sortedWaitlist });
                 showToast(`Sorteio concluído! ${result.waitlist.length} atleta(s) no Time Fora.`);
             } else { 
@@ -159,10 +167,17 @@ export const createWaitlist = () => {
                 updatedWaitlist = selectedForWaitlist.map(p => ({ ...p, waitlistRounds: 0 }));
             }
 
-            // 4. Ordena por categoria e ordem alfabética
+            // 4. Ordena por categoria/Elo e ordem alfabética
+            const mode = document.getElementById('draftMode')?.value || 'balanceado';
+            const useElo = mode === 'balanceado_elo';
             updatedWaitlist.sort((a, b) => {
-                const catDiff = (parseInt(b.categoria) || 1) - (parseInt(a.categoria) || 1);
-                if (catDiff !== 0) return catDiff;
+                if (useElo) {
+                    const eloDiff = (b.eloRating ?? 0) - (a.eloRating ?? 0);
+                    if (eloDiff !== 0) return eloDiff;
+                } else {
+                    const catDiff = (parseInt(b.categoria) || 1) - (parseInt(a.categoria) || 1);
+                    if (catDiff !== 0) return catDiff;
+                }
                 return (a.name || '').localeCompare(b.name || '');
             });
 
@@ -275,12 +290,19 @@ export const confirmMovePlayer = async () => {
 
     destTeam.players.push(playerToMove);
 
+    const mode = document.getElementById('draftMode')?.value || 'balanceado';
+    const useElo = mode === 'balanceado_elo';
     const sortFn = (a, b) => {
         if (destTeam.isWaitlist || sourceTeam.isWaitlist) {
             if (b.waitlistRounds !== a.waitlistRounds) return (b.waitlistRounds || 0) - (a.waitlistRounds || 0);
         }
-        const catDiff = (parseInt(b.categoria) || 1) - (parseInt(a.categoria) || 1);
-        if (catDiff !== 0) return catDiff;
+        if (useElo) {
+            const eloDiff = (b.eloRating ?? 0) - (a.eloRating ?? 0);
+            if (eloDiff !== 0) return eloDiff;
+        } else {
+            const catDiff = (parseInt(b.categoria) || 1) - (parseInt(a.categoria) || 1);
+            if (catDiff !== 0) return catDiff;
+        }
         return a.name.localeCompare(b.name);
     };
 
@@ -337,19 +359,24 @@ export const deleteTeam = (id) => {
                 const playersToMove = teamToDelete.players.map(p => ({ ...p, waitlistRounds: 0 }));
                 const updates = [deleteDoc(doc(teamsRef, id))];
 
-                if (waitlistTeam) {
-                    const updatedWaitlistPlayers = [...waitlistTeam.players, ...playersToMove].sort((a, b) => {
+                const mode = document.getElementById('draftMode')?.value || 'balanceado';
+                const useElo = mode === 'balanceado_elo';
+                const sortFn = (a, b) => {
+                    if (useElo) {
+                        const eloDiff = (b.eloRating ?? 0) - (a.eloRating ?? 0);
+                        if (eloDiff !== 0) return eloDiff;
+                    } else {
                         const catDiff = (parseInt(b.categoria) || 1) - (parseInt(a.categoria) || 1);
                         if (catDiff !== 0) return catDiff;
-                        return a.name.localeCompare(b.name);
-                    });
+                    }
+                    return a.name.localeCompare(b.name);
+                };
+
+                if (waitlistTeam) {
+                    const updatedWaitlistPlayers = [...waitlistTeam.players, ...playersToMove].sort(sortFn);
                     updates.push(updateDoc(doc(teamsRef, waitlistTeam.id), { players: updatedWaitlistPlayers }));
                 } else {
-                    const sortedPlayers = playersToMove.sort((a, b) => {
-                        const catDiff = (parseInt(b.categoria) || 1) - (parseInt(a.categoria) || 1);
-                        if (catDiff !== 0) return catDiff;
-                        return a.name.localeCompare(b.name);
-                    });
+                    const sortedPlayers = playersToMove.sort(sortFn);
                     updates.push(addDoc(teamsRef, { label: 'DE FORA', isWaitlist: true, players: sortedPlayers }));
                 }
 
@@ -387,9 +414,13 @@ export const redrawTeamWithWaitlist = async (teamId) => {
         const waitlistTeamDoc = state.drawnTeams.find(t => t.isWaitlist);
         const otherTeams = state.drawnTeams.filter(t => t.id !== teamId && !t.isWaitlist);
         
+        const mode = document.getElementById('draftMode')?.value || 'balanceado';
+        const useElo = mode === 'balanceado_elo';
+        const getRating = (p) => useElo ? (p.eloRating ?? 0) : (parseInt(p.categoria) || 1);
+
         let targetSum = 0;
         if (otherTeams.length > 0) {
-            const totalOtherSum = otherTeams.reduce((acc, t) => acc + t.players.reduce((sum, p) => sum + (parseInt(p.categoria) || 1), 0), 0);
+            const totalOtherSum = otherTeams.reduce((acc, t) => acc + t.players.reduce((sum, p) => sum + getRating(p), 0), 0);
             targetSum = totalOtherSum / otherTeams.length;
         }
 
@@ -413,7 +444,7 @@ export const redrawTeamWithWaitlist = async (teamId) => {
         }
 
         if (targetSum === 0) { 
-            targetSum = pool.reduce((acc, p) => acc + (parseInt(p.categoria) || 1), 0) * (N / pool.length);
+            targetSum = pool.reduce((acc, p) => acc + getRating(p), 0) * (N / pool.length);
         }
 
         const wlStrategy = document.getElementById('waitlistStrategy') ? document.getElementById('waitlistStrategy').value : 'BALANCEADO';
@@ -431,8 +462,8 @@ export const redrawTeamWithWaitlist = async (teamId) => {
             
             mandatory.sort((a, b) => {
                 if (b.waitlistRounds !== a.waitlistRounds) return b.waitlistRounds - a.waitlistRounds;
-                const catDiff = (parseInt(b.categoria) || 1) - (parseInt(a.categoria) || 1);
-                if (catDiff !== 0) return catDiff;
+                const ratingDiff = getRating(b) - getRating(a);
+                if (ratingDiff !== 0) return ratingDiff;
                 return a.name.localeCompare(b.name);
             });
             
@@ -457,7 +488,7 @@ export const redrawTeamWithWaitlist = async (teamId) => {
             bestCombos = [baseTeam];
         } else if (wlStrategy === 'MANTER_FORTE') {
             // Preenche com os mais fortes da lista de espera
-            limitedPool.sort((a, b) => (parseInt(b.categoria) || 1) - (parseInt(a.categoria) || 1));
+            limitedPool.sort((a, b) => getRating(b) - getRating(a));
             bestCombos = [ [...baseTeam, ...limitedPool.slice(0, slotsLeft)] ];
         } else if (wlStrategy === 'ALEATORIO') {
             // Preenche aleatoriamente (pool já foi embaralhado)
@@ -468,7 +499,7 @@ export const redrawTeamWithWaitlist = async (teamId) => {
                     const aVal = a.isFromWaitlist ? 1 : (a.isNew ? 0 : -1);
                     const bVal = b.isFromWaitlist ? 1 : (b.isNew ? 0 : -1);
                     if (bVal !== aVal) return bVal - aVal;
-                    return (parseInt(b.categoria) || 1) - (parseInt(a.categoria) || 1);
+                    return getRating(b) - getRating(a);
                 });
                 limitedPool = limitedPool.slice(0, 12);
             }
@@ -493,7 +524,7 @@ export const redrawTeamWithWaitlist = async (teamId) => {
 
             for (const combo of combos) {
                 const candidateTeam = [...baseTeam, ...combo];
-                const sum = candidateTeam.reduce((acc, p) => acc + (parseInt(p.categoria) || 1), 0);
+                const sum = candidateTeam.reduce((acc, p) => acc + getRating(p), 0);
                 const diff = Math.abs(sum - targetSum);
                 const waitlistCount = candidateTeam.filter(p => p.isFromWaitlist || p.isNew).length;
 
@@ -516,8 +547,8 @@ export const redrawTeamWithWaitlist = async (teamId) => {
             const { isFromTeam, isFromWaitlist, isNew, ...rest } = p;
             return { ...rest, waitlistRounds: 0 }; 
         }).sort((a, b) => {
-            const catDiff = (parseInt(b.categoria) || 1) - (parseInt(a.categoria) || 1);
-            if (catDiff !== 0) return catDiff;
+            const ratingDiff = getRating(b) - getRating(a);
+            if (ratingDiff !== 0) return ratingDiff;
             return a.name.localeCompare(b.name);
         });
 
@@ -529,8 +560,8 @@ export const redrawTeamWithWaitlist = async (teamId) => {
             return { ...rest, waitlistRounds: rounds };
         }).sort((a, b) => {
             if (b.waitlistRounds !== a.waitlistRounds) return (b.waitlistRounds || 0) - (a.waitlistRounds || 0);
-            const catDiff = (parseInt(b.categoria) || 1) - (parseInt(a.categoria) || 1);
-            if (catDiff !== 0) return catDiff;
+            const ratingDiff = getRating(b) - getRating(a);
+            if (ratingDiff !== 0) return ratingDiff;
             return a.name.localeCompare(b.name);
         });
 
@@ -572,13 +603,17 @@ export const promoteWaitlistToTeam = async (waitlistTeamId) => {
             return;
         }
 
+        const mode = document.getElementById('draftMode')?.value || 'balanceado';
+        const useElo = mode === 'balanceado_elo';
+        const getRating = (p) => useElo ? (p.eloRating ?? 0) : (parseInt(p.categoria) || 1);
+
         const existingTeams = state.drawnTeams.filter(t => !t.isWaitlist);
         let targetSum = 0;
         if (existingTeams.length > 0) {
-            const totalSum = existingTeams.reduce((acc, t) => acc + t.players.reduce((sum, p) => sum + (parseInt(p.categoria) || 1), 0), 0);
+            const totalSum = existingTeams.reduce((acc, t) => acc + t.players.reduce((sum, p) => sum + getRating(p), 0), 0);
             targetSum = totalSum / existingTeams.length;
         } else {
-            targetSum = waitlistDoc.players.reduce((acc, p) => acc + (parseInt(p.categoria) || 1), 0) * (N / waitlistDoc.players.length);
+            targetSum = waitlistDoc.players.reduce((acc, p) => acc + getRating(p), 0) * (N / waitlistDoc.players.length);
         }
 
         let pool = [...waitlistDoc.players];
@@ -606,7 +641,7 @@ export const promoteWaitlistToTeam = async (waitlistTeamId) => {
         let minDiff = Infinity;
 
         for (const combo of combos) {
-            const sum = combo.reduce((acc, p) => acc + (parseInt(p.categoria) || 1), 0);
+            const sum = combo.reduce((acc, p) => acc + getRating(p), 0);
             const diff = Math.abs(sum - targetSum);
             if (diff < minDiff) {
                 minDiff = diff; bestCombos = [combo];
@@ -618,16 +653,16 @@ export const promoteWaitlistToTeam = async (waitlistTeamId) => {
         let bestTeam = bestCombos[Math.floor(Math.random() * bestCombos.length)];
 
         const newTeamPlayers = bestTeam.map(p => ({...p, waitlistRounds: 0})).sort((a, b) => {
-            const catDiff = (parseInt(b.categoria) || 1) - (parseInt(a.categoria) || 1);
-            if (catDiff !== 0) return catDiff;
+            const ratingDiff = getRating(b) - getRating(a);
+            if (ratingDiff !== 0) return ratingDiff;
             return a.name.localeCompare(b.name);
         });
 
         const newTeamIds = new Set(newTeamPlayers.map(p => p.id));
         const remainingWaitlist = pool.filter(p => !newTeamIds.has(p.id));
         const sortedWaitlist = remainingWaitlist.sort((a, b) => {
-            const catDiff = (parseInt(b.categoria) || 1) - (parseInt(a.categoria) || 1);
-            if (catDiff !== 0) return catDiff;
+            const ratingDiff = getRating(b) - getRating(a);
+            if (ratingDiff !== 0) return ratingDiff;
             return a.name.localeCompare(b.name);
         });
 

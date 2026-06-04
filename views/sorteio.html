@@ -4,7 +4,8 @@
                 
                 <div class="flex flex-col sm:flex-row flex-wrap gap-2 w-full lg:w-auto items-stretch sm:items-center">
                     <select id="draftMode" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs sm:text-sm text-slate-300 outline-none font-bold w-full sm:w-auto" onchange="window.toggleDraftMode && window.toggleDraftMode(); window.syncDraftSettings && window.syncDraftSettings()">
-                        <option value="balanceado" selected>Sorteio Balanceado</option>
+                        <option value="balanceado" selected>Sorteio Balanceado por Nível</option>
+                        <option value="balanceado_elo">Sorteio Balanceado por Elo</option>
                         <option value="aleatorio">Sorteio Aleatório</option>
                         <option value="manual">Escolha Manual</option>
                     </select>
@@ -45,8 +46,8 @@
                             <tr>
                                 <th class="px-1 sm:px-4 py-3 sm:py-4 w-6 sm:w-10 text-center"><input type="checkbox" id="selectAll" onclick="toggleAllPlayers(this.checked)" class="w-3 h-3 sm:w-4 sm:h-4 accent-green-500 cursor-pointer"></th>
                                 <th class="px-1 sm:px-6 py-3 sm:py-4 whitespace-nowrap">Jogador</th>
-                                <th class="px-1 sm:px-6 py-3 sm:py-4 text-center">Categoria</th>
-                                <th class="px-1 sm:px-6 py-3 sm:py-4 text-center whitespace-nowrap">Nível (Elo)</th>
+                                <th class="px-1 sm:px-6 py-3 sm:py-4 text-center">Nível</th>
+                                <th class="px-1 sm:px-6 py-3 sm:py-4 text-center whitespace-nowrap">Elo (Pontos)</th>
                             </tr>
                         </thead>
                         <tbody id="sorteioTableBody" class="divide-y divide-slate-700 text-[10px] sm:text-sm"></tbody>

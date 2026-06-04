@@ -1,4 +1,4 @@
-import { toggleDraftMode, getLevelInfo, getCategoryInfo, getTeamName, getDailyPlayerStats, openMoveModal, showToast, switchView, openConfirmModal, closeConfirmModal, closeVictoryModalOnly, closeMoveModal, closePlayerHistoryModal, updateLiveEloPreview, setFormMode, editPlayer, resetForm, renderPublic, renderRanking, getNextDueDate, getPlayerLateChargesCount, renderSorteioTable, renderAdminTable, renderTeams, renderPlacarTeams, renderMatchHistory, togglePlacarLock, forceUnlockPlacar, toggleAuthMode, setGroupRoleFilter, filterUserGroups, renderUserGroups, renderAll, openPlacarConfigModal, closePlacarConfigModal, savePlacarConfig, playBeepSound, goHome, openTermsModal, closeTermsModal, openPrivacyModal, closePrivacyModal, openSupportModal, closeSupportModal, copySupportEmail } from '../ui.js';
+import { toggleDraftMode, getEloInfo, getLevelInfo, getTeamName, getDailyPlayerStats, openMoveModal, showToast, switchView, openConfirmModal, closeConfirmModal, closeVictoryModalOnly, closeMoveModal, closePlayerHistoryModal, updateLiveEloPreview, setFormMode, editPlayer, resetForm, renderPublic, renderRanking, getNextDueDate, getPlayerLateChargesCount, renderSorteioTable, renderAdminTable, renderTeams, renderPlacarTeams, renderMatchHistory, togglePlacarLock, forceUnlockPlacar, toggleAuthMode, setGroupRoleFilter, filterUserGroups, renderUserGroups, renderAll, openPlacarConfigModal, closePlacarConfigModal, savePlacarConfig, playBeepSound, goHome, openTermsModal, closeTermsModal, openPrivacyModal, closePrivacyModal, openSupportModal, closeSupportModal, copySupportEmail } from '../ui.js';
 
 import { state } from '../state.js';
 import { calculateEloMatch } from '../services/rankingService.js';
@@ -179,7 +179,7 @@ export const openPlayerHistoryModal = (playerName) => {
     const maxElo = state.players.length > 0 ? Math.max(...state.players.map(p => p.eloRating ?? 0)) : 0;
     const globalEloRank = [...state.players].sort((a, b) => (b.eloRating ?? 0) - (a.eloRating ?? 0) || a.name.localeCompare(b.name));
     const rankPosition = globalEloRank.findIndex(x => x.id === player.id) + 1;
-    const lvlInfo = getLevelInfo(player.eloRating ?? 0);
+    const lvlInfo = getEloInfo(player.eloRating ?? 0);
     const ptsValue = player.eloRating ?? 0;
     const isDestaque = ptsValue === maxElo && maxElo > 0;
     const vitorias = player.vitorias || 0;
@@ -300,7 +300,7 @@ const prepareExportTemplates = (type, playerName, day) => {
     const maxElo = state.players.length > 0 ? Math.max(...state.players.map(p => p.eloRating ?? 0)) : 0;
     const globalEloRank = [...state.players].sort((a, b) => (b.eloRating ?? 0) - (a.eloRating ?? 0) || a.name.localeCompare(b.name));
     const rankPosition = globalEloRank.findIndex(x => x.id === player.id) + 1;
-    const lvlInfo = getLevelInfo(player.eloRating ?? 0);
+    const lvlInfo = getEloInfo(player.eloRating ?? 0);
     const ptsValue = player.eloRating ?? 0;
     const isDestaque = ptsValue === maxElo && maxElo > 0;
     const pWins = player.vitorias || 0;

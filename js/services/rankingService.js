@@ -65,7 +65,7 @@ export const calculatePlayerFinalEloChange = (baseChange, isWin, currentStreak) 
  * Motor Central de Distribuição: Distribui iterativamente com base na menor soma 
  * de categorias e aplica o desempate pela qualidade dos jogadores no time.
  */
-const distributePlayersSmartly = (playersList, capacities) => {
+const distributePlayersSmartly = (playersList, capacities, useElo = false) => {
     let buckets = capacities.map(() => []);
 
     // 1. Embaralha perfeitamente a lista inteira primeiro (Fisher-Yates)
@@ -75,9 +75,17 @@ const distributePlayersSmartly = (playersList, capacities) => {
         [sortedPlayers[i], sortedPlayers[j]] = [sortedPlayers[j], sortedPlayers[i]];
     }
 
-    // 2. Ordena por categoria. 
-    // O JS mantém a ordem aleatória do embaralhamento para quem empatar na categoria
-    sortedPlayers.sort((a, b) => (parseInt(b.categoria) || 1) - (parseInt(a.categoria) || 1));
+    const getRating = (p) => {
+        if (useElo) {
+            return p.eloRating ?? 0;
+        } else {
+            return parseInt(p.categoria) || 1;
+        }
+    };
+
+    // 2. Ordena por categoria ou Elo. 
+    // O JS mantém a ordem aleatória do embaralhamento para quem empatar
+    sortedPlayers.sort((a, b) => getRating(b) - getRating(a));
 
     // 3. Distribuição Iterativa
     for (let p of sortedPlayers) {
@@ -100,15 +108,15 @@ const distributePlayersSmartly = (playersList, capacities) => {
             let bestBucket = buckets[bestBucketIndex];
             let candidateBucket = buckets[candidateIndex];
 
-            let sumBest = bestBucket.reduce((acc, val) => acc + (parseInt(val.categoria) || 1), 0);
-            let sumCand = candidateBucket.reduce((acc, val) => acc + (parseInt(val.categoria) || 1), 0);
+            let sumBest = bestBucket.reduce((acc, val) => acc + getRating(val), 0);
+            let sumCand = candidateBucket.reduce((acc, val) => acc + getRating(val), 0);
 
             if (sumCand < sumBest) {
                 bestBucketIndex = candidateIndex; // Candidato tem soma menor
             } else if (sumCand === sumBest) {
                 // Desempate de qualidade: Quem tem menos jogadores de nível muito alto recebe o próximo
-                let sortedBest = [...bestBucket].map(x => parseInt(x.categoria) || 1).sort((a,b) => b - a);
-                let sortedCand = [...candidateBucket].map(x => parseInt(x.categoria) || 1).sort((a,b) => b - a);
+                let sortedBest = [...bestBucket].map(x => getRating(x)).sort((a,b) => b - a);
+                let sortedCand = [...candidateBucket].map(x => getRating(x)).sort((a,b) => b - a);
                 
                 let candWins = false;
                 for (let j = 0; j < Math.max(sortedBest.length, sortedCand.length); j++) {
@@ -133,7 +141,7 @@ const distributePlayersSmartly = (playersList, capacities) => {
 /**
  * Estratégia "Dentro Forte": Fecha apenas os times completos. Os que sobraram vão para a espera.
  */
-export const balanceStrongInside = (playersList, playersPerTeam) => {
+export const balanceStrongInside = (playersList, playersPerTeam, useElo = false) => {
     const numberOfTeams = Math.floor(playersList.length / playersPerTeam);
     if (numberOfTeams === 0) return { teams: [], waitlist: playersList.map(p => ({...p, waitlistRounds: 0})) };
 
@@ -144,14 +152,22 @@ export const balanceStrongInside = (playersList, playersPerTeam) => {
         [sortedPlayers[i], sortedPlayers[j]] = [sortedPlayers[j], sortedPlayers[i]];
     }
 
-    sortedPlayers.sort((a, b) => (parseInt(b.categoria) || 1) - (parseInt(a.categoria) || 1));
+    const getRating = (p) => {
+        if (useElo) {
+            return p.eloRating ?? 0;
+        } else {
+            return parseInt(p.categoria) || 1;
+        }
+    };
+
+    sortedPlayers.sort((a, b) => getRating(b) - getRating(a));
 
     const activePlayersCount = numberOfTeams * playersPerTeam;
     const activePlayers = sortedPlayers.slice(0, activePlayersCount);
     const waitlistPlayers = sortedPlayers.slice(activePlayersCount).map(p => ({ ...p, waitlistRounds: 0 }));
 
     const capacities = Array(numberOfTeams).fill(playersPerTeam);
-    const teams = distributePlayersSmartly(activePlayers, capacities);
+    const teams = distributePlayersSmartly(activePlayers, capacities, useElo);
 
     return { teams, waitlist: waitlistPlayers };
 };
@@ -159,7 +175,7 @@ export const balanceStrongInside = (playersList, playersPerTeam) => {
 /**
  * Estratégia "Fora Forte": Distribui todos, colocando a lista de espera no sorteio como um "time".
  */
-export const balanceStrongOutside = (playersList, playersPerTeam) => {
+export const balanceStrongOutside = (playersList, playersPerTeam, useElo = false) => {
     const numberOfTeams = Math.floor(playersList.length / playersPerTeam);
     const waitlistSize = playersList.length % playersPerTeam;
     
@@ -170,7 +186,7 @@ export const balanceStrongOutside = (playersList, playersPerTeam) => {
         capacities.push(waitlistSize); // A lista de espera vira um bucket no sorteio
     }
 
-    const buckets = distributePlayersSmartly(playersList, capacities);
+    const buckets = distributePlayersSmartly(playersList, capacities, useElo);
 
     const teams = buckets.slice(0, numberOfTeams);
     const waitlist = waitlistSize > 0 ? buckets[numberOfTeams] : [];
