@@ -183,10 +183,11 @@ export const getPlayerLateChargesCount = (player) => {
     
     // 1. Cobranças de Mensalidades em atraso
     const settings = state.paymentSettings || {};
+    const monthlyEnabled = settings.monthlyEnabled !== false;
     const monthlyValue = parseFloat(settings.monthlyValue) || 0;
     const monthlyDay = parseInt(settings.monthlyDay) || 10;
     
-    if (monthlyValue > 0) {
+    if (monthlyEnabled && monthlyValue > 0) {
         const now = new Date();
         const nextDue = getNextDueDate(player.paidUntil, monthlyDay);
         if (now > nextDue) {

@@ -9,8 +9,22 @@ let currentMonthlyValue = 0;
 let currentMonthlyDay = 10;
 let currentCaixaVisibility = false;
 let currentCaixaBalance = 0;
+let currentMonthlyEnabled = true;
 
 let selectedDailyPlayerIds = new Set();
+
+window.toggleMonthlyEnabled = async (checked) => {
+    if (!state.currentGroupId) return;
+    try {
+        await setDoc(doc(db, 'groups', state.currentGroupId, 'paymentSettings', 'global'), { monthlyEnabled: checked }, { merge: true });
+        currentMonthlyEnabled = checked;
+        showToast(checked ? 'Mensalidades habilitadas!' : 'Mensalidades desabilitadas!', 'success');
+        renderPaymentsView();
+    } catch (e) {
+        console.error(e);
+        showToast('Erro ao atualizar mensalidade.', 'error');
+    }
+};
 
 const renderDailyPlayersList = () => {
     const list = document.getElementById('diariaPlayersList');
@@ -91,12 +105,29 @@ export const renderPaymentsView = async () => {
         const settingsDoc = await getDoc(doc(db, 'groups', state.currentGroupId, 'paymentSettings', 'global'));
         if (settingsDoc.exists()) {
             const data = settingsDoc.data();
-            currentPixKey = data.pixKey || '';
+             currentPixKey = data.pixKey || '';
             currentMonthlyValue = parseFloat(data.monthlyValue) || 0;
             currentMonthlyDay = parseInt(data.monthlyDay) || 10;
             currentCaixaVisibility = data.caixaVisibility || false;
+            currentMonthlyEnabled = data.monthlyEnabled !== false;
 
             if (isAdmin) {
+                const meCheck = document.getElementById('monthlyEnabled');
+                if (meCheck) meCheck.checked = currentMonthlyEnabled;
+
+                const tabMonthlyBtn = document.getElementById('tab-pay-monthly');
+                if (tabMonthlyBtn) {
+                    if (currentMonthlyEnabled) {
+                        tabMonthlyBtn.classList.remove('hidden');
+                    } else {
+                        tabMonthlyBtn.classList.add('hidden');
+                        const monthlyTabEl = document.getElementById('pay-admin-monthly');
+                        if (monthlyTabEl && !monthlyTabEl.classList.contains('hidden')) {
+                            setPaymentAdminTab('config');
+                        }
+                    }
+                }
+
                 const pixInput = document.getElementById('adminPixKey');
                 if (pixInput) pixInput.value = currentPixKey;
 
@@ -176,6 +207,13 @@ export const renderPaymentsView = async () => {
 
 const renderMonthlyView = (isAdmin, monthlyDay, adminTable, userMonthlyEl) => {
     const now = new Date();
+    const monthlyEnabled = state.paymentSettings?.monthlyEnabled !== false;
+
+    if (!monthlyEnabled) {
+        if (adminTable) adminTable.innerHTML = '';
+        if (userMonthlyEl) userMonthlyEl.innerHTML = '';
+        return;
+    }
 
     if (isAdmin && adminTable) {
         adminTable.innerHTML = '';
@@ -555,12 +593,14 @@ export const savePaymentSettings = async () => {
     const pixKey = document.getElementById('adminPixKey')?.value.trim() || '';
     const monthlyValue = parseFloat(document.getElementById('payMonthlyValue')?.value) || 0;
     const monthlyDay = parseInt(document.getElementById('payMonthlyDay')?.value) || 1;
-    const payload = { pixKey, monthlyValue, monthlyDay };
+    const monthlyEnabled = document.getElementById('monthlyEnabled')?.checked !== false;
+    const payload = { pixKey, monthlyValue, monthlyDay, monthlyEnabled };
     try {
         await setDoc(doc(db, 'groups', state.currentGroupId, 'paymentSettings', 'global'), payload, { merge: true });
         currentPixKey = pixKey;
         currentMonthlyValue = monthlyValue;
         currentMonthlyDay = monthlyDay;
+        currentMonthlyEnabled = monthlyEnabled;
     } catch (e) {
         console.error(e);
     }

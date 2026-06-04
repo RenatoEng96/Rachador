@@ -419,7 +419,8 @@ const initDatabaseListeners = async () => {
                 monthlyDay: parseInt(data.monthlyDay) || 10,
                 caixaVisibility: data.caixaVisibility || false,
                 blockLatePlayers: data.blockLatePlayers || false,
-                maxLateCharges: parseInt(data.maxLateCharges) || 1
+                maxLateCharges: parseInt(data.maxLateCharges) || 1,
+                monthlyEnabled: data.monthlyEnabled !== false
             };
         } else {
             state.paymentSettings = {
@@ -428,7 +429,8 @@ const initDatabaseListeners = async () => {
                 monthlyDay: 10,
                 caixaVisibility: false,
                 blockLatePlayers: false,
-                maxLateCharges: 1
+                maxLateCharges: 1,
+                monthlyEnabled: true
             };
         }
         renderAll();
@@ -672,7 +674,7 @@ Object.assign(window, {
     // NOVOS BINDINGS DE PAGAMENTOS:
     setPaymentAdminTab, renderPaymentsView, savePaymentSettings, generateDailyCharges,
     toggleCaixaVisibility, addCaixaEntry, saveGeneralPaymentSettings, toggleBlockLatePlayersSection,
-    showGeneralSettingsSaveBtn,
+    showGeneralSettingsSaveBtn, toggleMonthlyEnabled,
     // NOVOS BINDINGS DE PLACAR:
     openPlacarConfigModal, closePlacarConfigModal, savePlacarConfig, toggleTimer, resetTimer, playBeepSound, checkWinCondition,
     syncDraftSettings
