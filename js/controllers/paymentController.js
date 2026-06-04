@@ -10,6 +10,41 @@ let currentMonthlyDay = 10;
 let currentCaixaVisibility = false;
 let currentCaixaBalance = 0;
 
+let selectedDailyPlayerIds = new Set();
+
+const renderDailyPlayersList = () => {
+    const list = document.getElementById('diariaPlayersList');
+    if (!list) return;
+
+    const searchInput = document.getElementById('searchDailyPlayers');
+    const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+    list.innerHTML = '';
+
+    const sortedPlayers = [...state.players]
+        .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+        .filter(p => p.name.toLowerCase().includes(searchTerm));
+
+    sortedPlayers.forEach(p => {
+        const isChecked = selectedDailyPlayerIds.has(p.id) ? 'checked' : '';
+        list.innerHTML += `
+            <label class="flex items-center gap-3 p-2 hover:bg-slate-800 rounded-lg cursor-pointer">
+                <input type="checkbox" onchange="toggleDailyPlayerSelection('${p.id}', this.checked)" class="diaria-player-cb w-4 h-4 text-purple-500 bg-slate-950 border-slate-700 rounded" ${isChecked} value='${JSON.stringify({id: p.id, name: p.name, email: p.email})}'>
+                <span class="text-sm font-bold text-white">${p.name} <span class="text-xs text-slate-500 font-normal">(${p.email || 'Sem e-mail'})</span></span>
+            </label>
+        `;
+    });
+};
+
+window.toggleDailyPlayerSelection = (playerId, checked) => {
+    if (checked) {
+        selectedDailyPlayerIds.add(playerId);
+    } else {
+        selectedDailyPlayerIds.delete(playerId);
+    }
+};
+
+
 // Filtros e Paginação de Caixa/Extrato
 let cachedEntries = [];
 let adminCaixaCurrentPage = 1;
@@ -40,6 +75,12 @@ export const setPaymentAdminTab = (tab) => {
 
 export const renderPaymentsView = async () => {
     if (!state.currentGroupId) return;
+
+    selectedDailyPlayerIds.clear();
+    const searchMonthlyInput = document.getElementById('searchMonthlyPlayers');
+    if (searchMonthlyInput) searchMonthlyInput.value = '';
+    const searchDailyInput = document.getElementById('searchDailyPlayers');
+    if (searchDailyInput) searchDailyInput.value = '';
 
     if (unsubscribeCharges) unsubscribeCharges();
     if (unsubscribeCaixa) unsubscribeCaixa();
@@ -88,18 +129,7 @@ export const renderPaymentsView = async () => {
                 if (btnGeneral) btnGeneral.classList.add('hidden');
 
                 // Popula lista de jogadores para diária
-                const list = document.getElementById('diariaPlayersList');
-                if (list) {
-                    list.innerHTML = '';
-                    state.players.forEach(p => {
-                        list.innerHTML += `
-                            <label class="flex items-center gap-3 p-2 hover:bg-slate-800 rounded-lg cursor-pointer">
-                                <input type="checkbox" class="diaria-player-cb w-4 h-4 text-purple-500 bg-slate-950 border-slate-700 rounded" value='${JSON.stringify({id: p.id, name: p.name, email: p.email})}'>
-                                <span class="text-sm font-bold text-white">${p.name} <span class="text-xs text-slate-500 font-normal">(${p.email || 'Sem e-mail'})</span></span>
-                            </label>
-                        `;
-                    });
-                }
+                renderDailyPlayersList();
             }
         }
     } catch (err) {
@@ -109,6 +139,17 @@ export const renderPaymentsView = async () => {
     const adminMonthlyTable = document.getElementById('adminMonthlyTable');
     const adminDailyTable = document.getElementById('adminPaymentsTable');
     const userList = document.getElementById('userPendingChargesList');
+
+    if (searchMonthlyInput) {
+        searchMonthlyInput.oninput = () => {
+            renderMonthlyView(isAdmin, currentMonthlyDay, adminMonthlyTable, null);
+        };
+    }
+    if (searchDailyInput) {
+        searchDailyInput.oninput = () => {
+            renderDailyPlayersList();
+        };
+    }
 
     // Cria sub-containers dedicados no painel do jogador para evitar que
     // mensalidade e cobranças diárias se sobrescrevam mutuamente.
@@ -138,7 +179,14 @@ const renderMonthlyView = (isAdmin, monthlyDay, adminTable, userMonthlyEl) => {
 
     if (isAdmin && adminTable) {
         adminTable.innerHTML = '';
-        state.players.forEach(p => {
+        const searchInput = document.getElementById('searchMonthlyPlayers');
+        const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+        const sortedPlayers = [...state.players]
+            .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+            .filter(p => p.name.toLowerCase().includes(searchTerm));
+
+        sortedPlayers.forEach(p => {
             let nextDue = getNextDueDate(p.paidUntil, monthlyDay);
             let isOverdue = now > nextDue;
             const statusColor = isOverdue ? 'text-red-500' : 'text-green-500';
@@ -527,10 +575,14 @@ export const generateDailyCharges = async () => {
     if (!desc) return showToast("Digite uma descrição para a cobrança.", "error");
     if (!val || val <= 0) return showToast("Digite um valor válido.", "error");
 
-    const checkboxes = document.querySelectorAll('.diaria-player-cb:checked');
-    if (checkboxes.length === 0) return showToast("Selecione ao menos um jogador.", "error");
+    if (selectedDailyPlayerIds.size === 0) return showToast("Selecione ao menos um jogador.", "error");
 
-    const players = Array.from(checkboxes).map(cb => JSON.parse(cb.value));
+    const players = [];
+    state.players.forEach(p => {
+        if (selectedDailyPlayerIds.has(p.id)) {
+            players.push({ id: p.id, name: p.name, email: p.email || "" });
+        }
+    });
     
     let valuePerPlayer = val;
     if (type === 'split') {
@@ -574,7 +626,10 @@ export const generateDailyCharges = async () => {
         showToast("Cobranças enviadas com sucesso!", "success");
         document.getElementById('diariaDesc').value = '';
         document.getElementById('diariaValue').value = '';
-        document.querySelectorAll('.diaria-player-cb').forEach(cb => cb.checked = false);
+        const searchDailyInput = document.getElementById('searchDailyPlayers');
+        if (searchDailyInput) searchDailyInput.value = '';
+        selectedDailyPlayerIds.clear();
+        renderDailyPlayersList();
         setPaymentAdminTab('daily');
     } catch (e) {
         console.error(e);

@@ -207,7 +207,7 @@ export const getPlayerLateChargesCount = (player) => {
             const chargeEmail = charge.playerEmail ? charge.playerEmail.toLowerCase().trim() : '';
             const matchesPlayer = (player.id && charge.playerId === player.id) || (playerEmail && chargeEmail === playerEmail);
             
-            if (matchesPlayer && charge.status === 'pending' && nowMillis > charge.dueDate) {
+            if (matchesPlayer && charge.status === 'pending') {
                 count++;
             }
         });

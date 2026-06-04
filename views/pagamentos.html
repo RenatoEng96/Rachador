@@ -193,9 +193,15 @@
 
                             <!-- Relatório dos Mensalistas -->
                             <div class="bg-slate-900/50 rounded-xl border border-slate-700 overflow-hidden">
-                                <div class="px-5 py-3 border-b border-slate-700 flex items-center gap-2">
-                                    <i data-lucide="bar-chart-2" class="w-4 h-4 text-blue-400"></i>
-                                    <h4 class="text-sm font-bold text-white uppercase">Relatório de Mensalistas</h4>
+                                <div class="px-5 py-3 border-b border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                    <div class="flex items-center gap-2">
+                                        <i data-lucide="bar-chart-2" class="w-4 h-4 text-blue-400"></i>
+                                        <h4 class="text-sm font-bold text-white uppercase">Relatório de Mensalistas</h4>
+                                    </div>
+                                    <div class="relative w-full sm:w-48">
+                                        <input type="text" id="searchMonthlyPlayers" placeholder="Pesquisar..." class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-8 pr-2 py-1 text-xs text-white placeholder-slate-500 focus:border-blue-500 outline-none transition-colors">
+                                        <i data-lucide="search" class="absolute left-2.5 top-1.5 w-3.5 h-3.5 text-slate-500"></i>
+                                    </div>
                                 </div>
                                 <div class="overflow-x-auto w-full max-h-[450px] overflow-y-auto">
                                     <table class="w-full text-left table-auto">
@@ -243,6 +249,12 @@
                                             <option value="fixed">Fixo por jogador</option>
                                             <option value="split">Dividir total</option>
                                         </select>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="relative">
+                                        <input type="text" id="searchDailyPlayers" placeholder="Pesquisar jogador..." class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-8 pr-2 py-2 text-sm text-white placeholder-slate-500 focus:border-purple-500 outline-none transition-colors">
+                                        <i data-lucide="search" class="absolute left-2.5 top-2.5 w-4 h-4 text-slate-500"></i>
                                     </div>
                                 </div>
                                 <div class="bg-slate-950 border border-slate-700 rounded-xl p-4 max-h-52 overflow-y-auto mb-4" id="diariaPlayersList">
