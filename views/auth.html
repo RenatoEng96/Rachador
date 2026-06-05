@@ -19,6 +19,13 @@
                         <input type="password" id="authPass" placeholder="Sua Senha" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white outline-none focus:ring-2 focus:ring-green-500">
                     </div>
 
+                    <div id="registerTermsContainer" class="hidden my-2">
+                        <label class="flex items-start gap-2 text-xs text-slate-400 cursor-pointer">
+                            <input type="checkbox" id="authAcceptTerms" class="w-4 h-4 rounded accent-green-500 mt-0.5 shrink-0">
+                            <span class="leading-relaxed">Li e aceito os <a href="#" onclick="openTermsModal(event)" class="text-green-400 hover:underline font-semibold">Termos de Uso</a> e a <a href="#" onclick="openPrivacyModal(event)" class="text-green-400 hover:underline font-semibold">Política de Privacidade</a>.</span>
+                        </label>
+                    </div>
+
                     <button onclick="handleAuthAction()" id="btnAuthMain" class="w-full bg-green-500 hover:bg-green-600 text-slate-900 font-bold py-3 rounded-lg transition-colors flex justify-center items-center gap-2">
                         <i data-lucide="log-in" class="w-5 h-5"></i> ENTRAR
                     </button>
@@ -41,6 +48,10 @@
                     </svg>
                     Continuar com Google
                 </button>
+
+                <p id="googleDisclaimer" class="text-[10px] text-slate-500 text-center mt-2 leading-relaxed">
+                    Ao continuar com o Google, você concorda com os nossos <a href="#" onclick="openTermsModal(event)" class="text-slate-400 hover:underline">Termos de Uso</a> e <a href="#" onclick="openPrivacyModal(event)" class="text-slate-400 hover:underline">Política de Privacidade</a>.
+                </p>
 
                 <div class="mt-5 flex flex-col gap-3 text-center text-sm font-medium">
                     <button onclick="toggleAuthMode('register')" id="btnToggleAuth" class="text-slate-300 hover:text-green-400 transition-colors">Ainda não tem conta? <span class="font-bold underline">Cadastre-se</span></button>

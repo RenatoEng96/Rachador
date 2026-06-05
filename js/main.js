@@ -8,7 +8,8 @@ import {
     forceUnlockPlacar, toggleAuthMode, renderUserGroups, setFormMode, renderAdminTable,
     openPlacarConfigModal, closePlacarConfigModal, savePlacarConfig, playBeepSound, goHome,
     openTermsModal, closeTermsModal, openPrivacyModal, closePrivacyModal,
-    openSupportModal, closeSupportModal, copySupportEmail, filterUserGroups, setGroupRoleFilter
+    openSupportModal, closeSupportModal, copySupportEmail, filterUserGroups, setGroupRoleFilter,
+    acceptCookieConsent, declineCookieConsent, checkCookieConsent
 } from './ui.js';
 import {
     drawTeams, createWaitlist, clearTeams, confirmMovePlayer, deleteTeam,
@@ -57,13 +58,19 @@ export const handleAuthAction = async () => {
     const originalHtml = btn.innerHTML;
     btn.innerHTML = "AGUARDE...";
     btn.disabled = true;
-
     if (mode === 'register') {
         const name = document.getElementById('authName').value.trim();
         if (!name) { 
             btn.innerHTML = originalHtml; 
             btn.disabled = false; 
             return showToast("Preencha o seu nome.", "error"); 
+        }
+
+        const acceptChk = document.getElementById('authAcceptTerms');
+        if (acceptChk && !acceptChk.checked) {
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+            return showToast("Você deve aceitar os Termos de Uso e a Política de Privacidade.", "error");
         }
         
         const res = await registerUser(email, pass, name);
@@ -677,7 +684,9 @@ Object.assign(window, {
     showGeneralSettingsSaveBtn, toggleMonthlyEnabled,
     // NOVOS BINDINGS DE PLACAR:
     openPlacarConfigModal, closePlacarConfigModal, savePlacarConfig, toggleTimer, resetTimer, playBeepSound, checkWinCondition,
-    syncDraftSettings
+    syncDraftSettings,
+    // BINDINGS DE CONSENTIMENTO DE COOKIES E TERMOS (LGPD):
+    acceptCookieConsent, declineCookieConsent, checkCookieConsent
 });
 // ============================================================================
 // BOOTSTRAP DA APLICAÇÃO
@@ -688,6 +697,9 @@ import { loadViews } from './viewLoader.js';
 document.addEventListener('DOMContentLoaded', async () => {
     // Carrega as views divididas antes de inicializar a aplicação
     await loadViews();
+    
+    // Verifica o consentimento de cookies e termos (LGPD)
+    checkCookieConsent();
     
     // O Observador agora escuta se a pessoa entrou na conta
     initAuthObserver(async (isAuthenticated, user) => {

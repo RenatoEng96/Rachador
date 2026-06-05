@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rachador-pwa-v4';
+const CACHE_NAME = 'rachador-pwa-v5';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -17,15 +17,23 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('fetch', event => {
+  // Ignora requisições que não sejam GET ou que sejam para APIs externas/Firebase
+  if (
+    event.request.method !== 'GET' ||
+    event.request.url.includes('firestore.googleapis.com') ||
+    event.request.url.includes('firebase') ||
+    event.request.url.includes('googleapis.com')
+  ) {
+    return; // Deixa o navegador tratar a requisição diretamente pela rede
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then(response => {
         if (response) {
-          return response; // Return from cache
+          return response; // Retorna do cache
         }
-        return fetch(event.request).catch(() => {
-          // Fallback if offline and not in cache
-        });
+        return fetch(event.request);
       })
   );
 });

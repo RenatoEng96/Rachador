@@ -274,18 +274,25 @@ export const toggleAuthMode = (mode) => {
     // Altera os títulos
     document.getElementById('authTitle').innerText = isRegister ? 'Criar Conta' : 'Bem-vindo';
     document.getElementById('authSubtitle').innerText = isRegister ? 'Preencha seus dados para começar.' : 'Faça login para acessar seus grupos.';
-    
-    // Mostra/Esconde o campo de Nome
+    // Mostra/Esconde o campo de Nome e Termos de Registro
     const nameContainer = document.getElementById('registerNameContainer');
-    if(isRegister) {
-        nameContainer.classList.remove('hidden');
+    const termsContainer = document.getElementById('registerTermsContainer');
+    const acceptChk = document.getElementById('authAcceptTerms');
+    if (acceptChk) acceptChk.checked = false;
+
+    if (isRegister) {
+        nameContainer?.classList.remove('hidden');
+        termsContainer?.classList.remove('hidden');
     } else {
-        nameContainer.classList.add('hidden');
+        nameContainer?.classList.add('hidden');
+        termsContainer?.classList.add('hidden');
     }
 
     // Atualiza os botões principais
     const btnMain = document.getElementById('btnAuthMain');
-    btnMain.innerHTML = isRegister ? '<i data-lucide="user-plus" class="w-5 h-5"></i> CADASTRAR' : '<i data-lucide="log-in" class="w-5 h-5"></i> ENTRAR';
+    if (btnMain) {
+        btnMain.innerHTML = isRegister ? '<i data-lucide="user-plus" class="w-5 h-5"></i> CADASTRAR' : '<i data-lucide="log-in" class="w-5 h-5"></i> ENTRAR';
+    }
     
     // Atualiza o texto do rodapé (alternar entre login e registro)
     const btnToggle = document.getElementById('btnToggleAuth');
@@ -832,3 +839,34 @@ document.addEventListener('click', (event) => {
         }
     });
 });
+
+// ============================================================================
+// LÓGICA DE CONSENTIMENTO DE COOKIES E TERMOS (LGPD)
+// ============================================================================
+
+export const checkCookieConsent = () => {
+    const consent = localStorage.getItem('rachador_cookie_consent');
+    const banner = document.getElementById('cookieConsentBanner');
+    if (!consent && banner) {
+        banner.classList.remove('hidden');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+};
+
+export const acceptCookieConsent = () => {
+    localStorage.setItem('rachador_cookie_consent', 'accepted');
+    const banner = document.getElementById('cookieConsentBanner');
+    if (banner) {
+        banner.classList.add('hidden');
+    }
+    showToast("Preferências de cookies salvas!", "success");
+};
+
+export const declineCookieConsent = () => {
+    localStorage.setItem('rachador_cookie_consent', 'declined');
+    const banner = document.getElementById('cookieConsentBanner');
+    if (banner) {
+        banner.classList.add('hidden');
+    }
+    showToast("Cookies de análise recusados.", "info");
+};
