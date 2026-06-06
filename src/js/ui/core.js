@@ -2,7 +2,7 @@ import { getEloInfo, getLevelInfo, getTeamName, getDailyPlayerStats, openMoveMod
 
 import { state } from '../state.js';
 import { calculateEloMatch } from '../services/rankingService.js';
-import { settingsRef, updateDoc } from '../firebase.js';
+import { settingsRef, updateDoc, setDoc } from '../firebase.js';
 import { domToBlob } from 'https://unpkg.com/modern-screenshot?module';
 
 
@@ -675,7 +675,6 @@ export const savePlacarConfig = async () => {
     }
     
     try {
-        const { setDoc } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
         await setDoc(settingsRef, { matchConfig: state.matchConfig }, { merge: true });
         showToast("Configurações salvas e aplicadas para o grupo!", "success");
     } catch (e) {

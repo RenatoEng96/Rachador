@@ -24,7 +24,10 @@ import {
     updateDoc,
     query,
     orderBy,
-    where                           // NOVO: Para filtrar grupos do utilizador
+    where,                          // NOVO: Para filtrar grupos do utilizador
+    arrayUnion,
+    arrayRemove,
+    deleteField
 } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 
@@ -89,6 +92,9 @@ export {
     query,
     orderBy,
     where,
+    arrayUnion,
+    arrayRemove,
+    deleteField,
     storage,
     ref,
     uploadBytes,

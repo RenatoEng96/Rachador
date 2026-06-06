@@ -1,8 +1,6 @@
-const CACHE_NAME = 'rachador-pwa-v5';
+const CACHE_NAME = 'rachador-pwa-v6';
 const urlsToCache = [
   '/',
-  '/index.html',
-  '/css/styles.css',
   '/Icone.png',
   '/Apito.wav'
 ];

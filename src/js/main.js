@@ -35,7 +35,7 @@ import {
     globalGroupsRef, setGroupContext, deleteDoc, updateDoc,
     onSnapshot, addDoc, query, where, getDoc, doc, db,
     storage, ref, uploadBytes, getDownloadURL, deleteObject,
-    collection
+    collection, setDoc, getDocs
 } from './firebase.js';
 
 export const adjustBonus = (val) => {
@@ -469,7 +469,6 @@ export const syncDraftSettings = async () => {
     const waitlistStrategy = document.getElementById('waitlistStrategy')?.value || 'BALANCEADO';
     
     try {
-        const { setDoc } = await import('./firebase.js');
         await setDoc(settingsRef, {
             teamSize,
             draftMode,
@@ -510,8 +509,7 @@ export const saveUserProfile = async () => {
     btn.disabled = true;
     
     try {
-        // Importamos funções extras para buscar e atualizar nos grupos
-        const { setDoc, collection, query, where, getDocs, updateDoc } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
+        // Importamos funções extras para buscar e atualizar nos grupos (Agora importadas de firebase.js)
         
         const userEmail = state.user.email.toLowerCase();
 

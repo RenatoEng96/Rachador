@@ -4,7 +4,7 @@ import {
     globalGroupsRef, 
 } from '../firebase.js';
 import { showToast, openConfirmModal, renderSorteioTable, resetForm } from '../ui.js';
-import { arrayUnion, getDocs, collection, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"; // NOVO IMPORT
+import { arrayUnion, getDocs, collection, query, where, deleteField, arrayRemove } from '../firebase.js';
 
 // ============================================================================
 // CONFIGURAÇÕES GLOBAIS
@@ -164,7 +164,7 @@ export const savePlayer = async () => {
             updatedAt: Date.now()
         };
 
-        const { deleteField, arrayUnion, arrayRemove } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
+        // dynamic import removed
 
         // Trata o campo de e-mail no Firestore
         if (mode === 'email') {
@@ -320,7 +320,7 @@ export const deletePlayer = (id) => {
 
             if (playerEmail && state.currentGroupId) {
                 const groupDocRef = doc(db, 'groups', state.currentGroupId);
-                const { arrayRemove } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
+                // dynamic import removed
                 await updateDoc(groupDocRef, {
                     memberEmails: arrayRemove(playerEmail),
                     moderatorEmails: arrayRemove(playerEmail)
