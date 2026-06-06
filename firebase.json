@@ -13,15 +13,19 @@
     }
   },
   "hosting": {
-    "public": ".",
+    "public": "public",
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**",
-      "public/**",
       "README.md",
       "firestore.rules",
-      "skills-lock.json"
+      "skills-lock.json",
+      "capacitor.config.json",
+      "package.json",
+      "package-lock.json",
+      "android/**",
+      "ios/**"
     ],
     "rewrites": [
       {

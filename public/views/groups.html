@@ -1,0 +1,99 @@
+<section id="view-groups" class="hidden-view animate-in fade-in duration-500 py-6 sm:py-10">
+            <div class="bg-slate-800 p-6 sm:p-8 rounded-3xl shadow-2xl border border-slate-700 mb-10 flex flex-col sm:flex-row items-center gap-6 sm:gap-10">
+                <label class="relative group/photo flex flex-col items-center shrink-0">
+                    <div class="w-28 h-28 sm:w-36 sm:h-36 rounded-full bg-slate-900 border-4 border-slate-700 flex items-center justify-center overflow-hidden group-hover/photo:border-blue-500 transition-colors">
+                        <img id="userProfilePhotoPreview" class="w-full h-full object-cover hidden" src="" alt="Sua Foto">
+                        <div id="userProfilePhotoPlaceholder" class="text-slate-500 flex flex-col items-center">
+                            <i data-lucide="camera" class="w-8 h-8 mb-1"></i>
+                            <span class="text-[10px] font-bold uppercase">Sua Foto</span>
+                        </div>
+                    </div>
+    
+                    <input type="file" id="userProfilePhotoInput" accept="image/*" class="hidden" onchange="handleUserProfilePhotoUpload(event)">
+                    <input type="hidden" id="userProfilePhotoData" value="">
+    
+                    <div class="absolute bottom-2 right-2 bg-blue-500 p-2 rounded-full border-2 border-slate-800 shadow-lg cursor-pointer hover:bg-blue-400 transition-colors" onclick="document.getElementById('userProfilePhotoInput').click()">
+                        <i data-lucide="edit-2" class="w-4 h-4 text-white"></i>
+                    </div>
+
+                    <div id="btnRemoveProfilePhoto" class="absolute top-0 right-0 bg-red-500 p-2 rounded-full border-2 border-slate-800 shadow-lg cursor-pointer hover:bg-red-400 transition-colors hidden" onclick="event.preventDefault(); removeUserProfilePhoto();">
+                        <i data-lucide="trash-2" class="w-4 h-4 text-white"></i>
+                    </div>
+                </label>
+                <div class="flex-1 w-full space-y-4 text-center sm:text-left">
+                    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
+                        <div class="text-center sm:text-left">
+                            <h2 class="text-2xl font-black text-white mb-1">Seu Perfil</h2>
+                            <p class="text-sm text-slate-400">Seus dados oficiais no Rachador.</p>
+                        </div>
+                        <button onclick="handleLogout()" class="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-xl font-bold transition-all flex items-center gap-2 text-sm justify-center w-full sm:w-auto active:scale-95">
+                            <i data-lucide="log-out" class="w-4 h-4"></i> Sair
+                        </button>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 mb-1 block uppercase tracking-wider">Como você quer ser chamado?</label>
+                        <input type="text" id="userProfileNameInput" placeholder="Seu nome de jogador" oninput="checkProfileChanges()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-4 text-white outline-none focus:border-blue-500 transition-colors font-bold text-lg text-center sm:text-left">
+                    </div>
+                    <button onclick="saveUserProfile()" id="btnSaveProfile" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30 mx-auto sm:mx-0 hidden">
+                        <i data-lucide="save" class="w-5 h-5"></i> SALVAR PERFIL
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-black text-white flex items-center gap-3">
+                        <i data-lucide="users" class="w-8 h-8 text-blue-500"></i> Meus Grupos
+                    </h2>
+                    <p class="text-slate-400 text-sm mt-1">Selecione um racha para acessar o painel ou crie o seu próprio.</p>
+                </div>
+                <div class="flex gap-3 w-full md:w-auto">
+                    <button onclick="document.getElementById('createGroupModal').classList.remove('hidden'); document.getElementById('createGroupModal').classList.add('flex');" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl font-bold transition-all flex items-center gap-2 text-sm shadow-lg shadow-blue-500/30 flex-1 md:flex-none justify-center">
+                        <i data-lucide="plus-circle" class="w-4 h-4"></i> Novo Grupo
+                    </button>
+                </div>
+            </div>
+
+            <!-- FILTROS DE GRUPOS -->
+            <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 bg-slate-800/50 p-4 sm:p-5 rounded-2xl border border-slate-700 mb-8 shadow-lg backdrop-blur-md">
+                <!-- Busca por Nome -->
+                <div class="relative flex-1">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                        <i data-lucide="search" class="w-4 h-4"></i>
+                    </span>
+                    <input type="text" id="searchGroupInput" oninput="window.filterUserGroups()" placeholder="Pesquisar racha pelo nome..." class="bg-slate-900/80 border border-slate-700 rounded-xl py-2.5 pl-10 pr-4 text-xs sm:text-sm text-white placeholder-slate-500 outline-none w-full focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all font-bold">
+                </div>
+                
+                <!-- Filtro por Cargo -->
+                <div class="flex items-center gap-2 shrink-0">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mr-1 hidden md:inline">Cargo:</span>
+                    <div class="flex bg-slate-900/80 p-1 rounded-xl border border-slate-700 w-full sm:w-auto">
+                        <button onclick="window.setGroupRoleFilter('all')" id="btnFilterRole-all" class="flex-1 sm:flex-none px-3.5 py-1.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all bg-blue-600 text-white shadow">
+                            Todos
+                        </button>
+                        <button onclick="window.setGroupRoleFilter('admin')" id="btnFilterRole-admin" class="flex-1 sm:flex-none px-3.5 py-1.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all text-slate-400 hover:text-white">
+                            Admin
+                        </button>
+                        <button onclick="window.setGroupRoleFilter('moderador')" id="btnFilterRole-moderador" class="flex-1 sm:flex-none px-3.5 py-1.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all text-slate-400 hover:text-white">
+                            Moderador
+                        </button>
+                        <button onclick="window.setGroupRoleFilter('jogador')" id="btnFilterRole-jogador" class="flex-1 sm:flex-none px-3.5 py-1.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all text-slate-400 hover:text-white">
+                            Jogador
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="userGroupsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+            <div id="noGroupsMessage" class="hidden flex-col items-center justify-center py-16 bg-slate-800/30 rounded-3xl border border-slate-700 border-dashed text-center">
+                <div class="bg-slate-800 p-4 rounded-full mb-4">
+                    <i data-lucide="ghost" class="w-12 h-12 text-slate-500"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Você ainda não faz parte de nenhum grupo</h3>
+                <p class="text-slate-400 max-w-md mx-auto mb-6">Crie o seu próprio grupo para ser o administrador e gerenciar suas partidas, ou peça para um administrador te adicionar a um grupo existente pelo seu e-mail.</p>
+                <button onclick="document.getElementById('createGroupModal').classList.remove('hidden'); document.getElementById('createGroupModal').classList.add('flex');" class="bg-green-500 text-slate-900 px-6 py-3 rounded-xl font-black transition-all flex items-center gap-2">
+                    <i data-lucide="plus" class="w-5 h-5"></i> CRIAR MEU PRIMEIRO GRUPO
+                </button>
+            </div>
+        </section>

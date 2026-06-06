@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "513517127257",
+    "project_id": "timecerto-c9d1f",
+    "storage_bucket": "timecerto-c9d1f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:513517127257:android:7be3c162b221f5936c9348",
+        "android_client_info": {
+          "package_name": "com.rachador.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "513517127257-8akfkoh9d8c6l74k646r8l1uc5t605a4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCLcRWwSndQ-VP43KNfua0svsHIs1yHqKg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "513517127257-8akfkoh9d8c6l74k646r8l1uc5t605a4.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "513517127257-a1ni1h8aoi1gao95bpu5n4dt3jssd2gg.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.rachador.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

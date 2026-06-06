@@ -1,0 +1,24 @@
+{
+  "name": "Rachador",
+  "short_name": "Rachador",
+  "description": "A plataforma definitiva para organizadores de rachas. O fim dos times desequilibrados.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/Icone.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/Icone.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0f172a">
+    <title>Rachador</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="Icone.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+  <script type="module" crossorigin src="/assets/index-CpBDbFPV.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-NPfnjyTn.css">
+</head>
+<body class="min-h-screen flex flex-col touch-manipulation">
+
+    <!-- INJECT: nav -->
+
+    <div id="loading-overlay" class="fixed inset-0 bg-slate-950 z-[100] flex flex-col items-center justify-center">
+        <div class="loader mb-4"></div>
+        <p class="text-slate-400 animate-pulse">Carregando...</p>
+    </div>
+
+    <main class="max-w-7xl mx-auto w-full p-2 sm:p-4 md:p-8 flex-1">
+        
+        <!-- ABA (RANKING) -->
+        <!-- INJECT: view-public -->
+
+        <!-- NOVA ABA: SORTEIO -->
+        <!-- INJECT: view-sorteio -->
+
+        <!-- ABA PLACAR -->
+        <!-- INJECT: view-placar -->
+
+        <!-- ABA LANDING PAGE -->
+        <!-- INJECT: view-landing -->
+
+        <!-- ABA LOGIN -->
+        <!-- INJECT: view-auth -->
+
+        <!-- INJECT: view-groups -->
+
+        <!-- ABA ADMIN (Apenas Edição de Jogadores e Configurações) -->
+        <!-- INJECT: view-admin -->
+
+        <!-- ABA (PAGAMENTOS) -->
+        <!-- INJECT: view-pagamentos -->
+
+        <!-- Modais (Victory, Confirm, Move, Config Placar) -->
+        <!-- INJECT: victoryModal -->
+
+        <!-- INJECT: confirmModal -->
+
+        <!-- INJECT: movePlayerModal -->
+    
+        <!-- INJECT: playerHistoryModal -->
+    
+        <!-- INJECT: createGroupModal -->
+
+        <!-- Modal de Configuração do Placar -->
+        <!-- INJECT: placarConfigModal -->
+
+        <!-- Modal de Termos de Uso -->
+        <!-- INJECT: termsModal -->
+
+        <!-- Modal de Política de Privacidade -->
+        <!-- INJECT: privacyModal -->
+
+        <!-- Modal de Suporte -->
+        <!-- INJECT: supportModal -->
+
+    </main>
+
+    <div id="toast" class="fixed bottom-5 right-5 text-white px-4 py-2 rounded-xl shadow-2xl transform translate-y-24 transition-transform flex items-center gap-2 z-[60] text-sm">
+        <i id="toastIcon" data-lucide="info" class="w-4 h-4"></i><span id="toastMsg"></span>
+    </div>
+
+    <!-- Contêineres Ocultos para html2canvas Exportação -->
+    <div id="shareableExportContainer" style="position: absolute; left: -9999px; top: -9999px; overflow: hidden; pointer-events: none; z-index: -9999;">
+        <!-- Card apenas -->
+        <div id="shareableCardOnly" class="p-4 bg-slate-950 flex justify-center items-center rounded-3xl" style="width: 250px; height: 340px; box-sizing: border-box;">
+            <!-- Cartinha de Alta Qualidade renderizada aqui -->
+        </div>
+
+        <!-- Histórico apenas -->
+        <div id="shareableHistoryOnly" class="p-8 bg-slate-900 border border-slate-750 flex flex-col justify-start rounded-3xl" style="width: 500px; min-height: 400px; font-family: 'Roboto Condensed', sans-serif; color: #f1f5f9; box-sizing: border-box;">
+            <!-- Conteúdo do Histórico renderizado aqui -->
+        </div>
+
+        <!-- Combinado (Card + Histórico) -->
+        <div id="shareableCombined" class="p-6 bg-slate-900 border border-slate-750 flex flex-row items-center gap-6 rounded-3xl" style="width: 850px; min-height: 380px; font-family: 'Roboto Condensed', sans-serif; color: #f1f5f9; box-sizing: border-box;">
+            <!-- Esquerda: Cartinha, Direita: Histórico -->
+        </div>
+    </div>
+
+    <!-- Overlay de processamento de compartilhamento -->
+    <div id="share-loading-overlay" class="fixed inset-0 bg-slate-950/90 z-[300] hidden flex-col items-center justify-center backdrop-blur-sm animate-in fade-in">
+        <div class="loader mb-4 border-t-green-500"></div>
+        <p class="text-white font-black uppercase tracking-wider text-sm animate-pulse" id="share-loading-text">Processando imagem...</p>
+    </div>
+
+    <!-- Script Principal (Mantém a sua importação) -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').then(registration => {
+                    console.log('SW registered: ', registration);
+                }).catch(registrationError => {
+                    console.log('SW registration failed: ', registrationError);
+                });
+            });
+        }
+    </script>
+
+</body>
+</html>

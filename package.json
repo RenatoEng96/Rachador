@@ -1,0 +1,37 @@
+{
+  "name": "rachador",
+  "version": "1.0.0",
+  "description": "[![PWA Ready](https://img.shields.io/badge/PWA-Ready-success?style=for-the-badge&logo=pwa&logoColor=white&color=22c55e)](https://developer.mozilla.org/pt-BR/docs/Web/Progressive_web_apps)\r [![Firebase Backed](https://img.shields.io/badge/Firebase-Realtime-orange?style=for-the-badge&logo=firebase&logoColor=white&color=f5820d)](https://firebase.google.com/)\r [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-Aesthetics-blue?style=for-the-badge&logo=tailwind-css&logoColor=white&color=06b6d4)](https://tailwindcss.com/)\r [![License MIT](https://img.shields.io/badge/License-MIT-blueviolet?style=for-the-badge&color=8b5cf6)](file:///home/renato/Documentos/GitHub/Rachador/LICENSE)",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RenatoEng96/Rachador.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/RenatoEng96/Rachador/issues"
+  },
+  "homepage": "https://github.com/RenatoEng96/Rachador#readme",
+  "devDependencies": {
+    "@capacitor/cli": "^8.4.0",
+    "vite": "^8.0.16"
+  },
+  "dependencies": {
+    "@capacitor-community/admob": "^8.0.0",
+    "@capacitor-firebase/authentication": "^8.3.0",
+    "@capacitor/android": "^8.4.0",
+    "@capacitor/core": "^8.4.0",
+    "@capacitor/filesystem": "^8.1.2",
+    "@capacitor/ios": "^8.4.0",
+    "@capacitor/share": "^8.0.1",
+    "firebase": "^12.14.0"
+  }
+}
