@@ -4,6 +4,7 @@ import { state } from '../state.js';
 import { calculateEloMatch } from '../services/rankingService.js';
 import { settingsRef, updateDoc } from '../firebase.js';
 import { domToBlob } from 'https://unpkg.com/modern-screenshot?module';
+import { showInterstitialAd } from '../admobService.js';
 
 // ============================================================================
 // CONTROLE DE NAVEGAÇÃO E MODAIS
@@ -225,6 +226,12 @@ export const closeVictoryModalOnly = async () => {
     }
     
     if (typeof updateLiveEloPreview === 'function') updateLiveEloPreview();
+    
+    try {
+        await showInterstitialAd();
+    } catch(e) {
+        console.warn('Erro ao exibir anúncio:', e);
+    }
 };
 
 export const closeMoveModal = () => { 

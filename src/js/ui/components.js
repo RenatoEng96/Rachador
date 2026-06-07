@@ -328,7 +328,7 @@ const prepareExportTemplates = (type, playerName, day) => {
                         <div class="w-20 h-20 mt-3 mb-1 flex items-center justify-center bg-black/10 rounded-full border-2 border-yellow-400/60 text-yellow-200 shrink-0 overflow-hidden" style="z-index: 10;">
                             ${player.photo ? `<img src="${player.photo}" class="w-full h-full object-cover">` : `<svg viewBox="0 0 24 24" width="40" height="40" stroke="#fef08a" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10 opacity-80" style="width: 40px; height: 40px; color: #fef08a;"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`}
                         </div>
-                        <div class="player-name text-yellow-100" style="z-index: 10; font-size: 16px; font-weight: bold; font-family: 'Oswald', sans-serif; text-transform: uppercase; width: 90%; text-align: center; border-bottom: 2px solid currentColor; padding-bottom: 2px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">${player.name}</div>
+                        <div class="player-name text-yellow-100" style="z-index: 10; font-size: 14px; font-weight: bold; font-family: 'Oswald', sans-serif; text-transform: uppercase; width: 95%; text-align: center; border-bottom: 2px solid currentColor; padding-bottom: 2px; white-space: normal; line-height: 1.1; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; word-wrap: break-word;">${player.name}</div>
                         <div class="w-full mt-2 flex justify-evenly items-center px-4" style="z-index: 10; font-family: 'Roboto Condensed', sans-serif;">
                             <div class="flex flex-col items-center">
                                 <span class="text-base font-black text-white" style="font-size: 14px;">${pWins}</span>
@@ -356,7 +356,7 @@ const prepareExportTemplates = (type, playerName, day) => {
                             <svg viewBox="0 0 24 24" width="40" height="40" stroke="#cbd5e1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10 opacity-80" style="width: 40px; height: 40px; color: #cbd5e1;"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                         `)}
                     </div>
-                    <div class="player-name" style="z-index: 10; font-size: 16px; font-weight: bold; font-family: 'Oswald', sans-serif; text-transform: uppercase; width: 90%; text-align: center; border-bottom: 2px solid currentColor; padding-bottom: 2px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">${player.name}</div>
+                    <div class="player-name" style="z-index: 10; font-size: 14px; font-weight: bold; font-family: 'Oswald', sans-serif; text-transform: uppercase; width: 95%; text-align: center; border-bottom: 2px solid currentColor; padding-bottom: 2px; white-space: normal; line-height: 1.1; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; word-wrap: break-word;">${player.name}</div>
                     <div class="w-full mt-2 flex justify-evenly items-center px-4" style="z-index: 10; font-family: 'Roboto Condensed', sans-serif;">
                         <div class="flex flex-col items-center">
                             <span class="text-base font-black text-white" style="font-size: 14px;">${pWins}</span>

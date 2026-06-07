@@ -1,6 +1,7 @@
 import { state } from '../state.js';
 import { db, collection, addDoc, doc, setDoc, query, where, onSnapshot, getDoc, updateDoc, getDocs, deleteDoc } from '../firebase.js';
 import { showToast, openConfirmModal } from '../ui.js';
+import { showInterstitialAd } from '../admobService.js';
 
 let unsubscribeCharges = null;
 let unsubscribeCaixa = null;
@@ -671,6 +672,12 @@ export const generateDailyCharges = async () => {
         selectedDailyPlayerIds.clear();
         renderDailyPlayersList();
         setPaymentAdminTab('daily');
+        
+        try {
+            await showInterstitialAd();
+        } catch (e) {
+            console.warn('Erro ao exibir anúncio:', e);
+        }
     } catch (e) {
         console.error(e);
         showToast("Erro ao criar cobranças.", "error");

@@ -31,12 +31,13 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  // Ignora requisições que não sejam GET ou que sejam para APIs externas/Firebase
+  // Ignora requisições que não sejam GET ou que sejam para APIs externas/Firebase/Google Fonts
   if (
     event.request.method !== 'GET' ||
     event.request.url.includes('firestore.googleapis.com') ||
     event.request.url.includes('firebase') ||
-    event.request.url.includes('googleapis.com')
+    event.request.url.includes('googleapis.com') ||
+    event.request.url.includes('gstatic.com')
   ) {
     return;
   }
