@@ -1,5 +1,5 @@
 # Ignora arquivos de credenciais
-js/config.js
+src/js/config.js
 
 # Dependencies
 node_modules
