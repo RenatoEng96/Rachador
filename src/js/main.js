@@ -151,6 +151,25 @@ export const handleLogout = async () => {
     switchView('auth');
 };
 
+export const handleDeleteAccount = async () => {
+    openConfirmModal("Excluir Conta", "Deseja apagar sua conta permanentemente? Isso removerá o seu acesso ao app, mas o histórico de partidas passadas será preservado (seu nome aparecerá como 'Excluído'). Esta ação NÃO pode ser desfeita.", async () => {
+        showToast("Excluindo conta, por favor aguarde...", "info");
+        try {
+            const { functions, httpsCallable } = await import('./firebase.js');
+            const deleteUserAccount = httpsCallable(functions, 'deleteUserAccount');
+            await deleteUserAccount({});
+            
+            showToast("Conta excluída com sucesso.", "success");
+            clearAllListeners();
+            await logoutUser();
+            switchView('landing');
+        } catch (e) {
+            console.error("Erro ao excluir conta:", e);
+            showToast("Erro ao excluir a conta. Pode ser necessário fazer login novamente antes de tentar.", "error");
+        }
+    });
+};
+
 // Carrega a lista de Rachas do Utilizador
 export const loadUserGroups = () => {
     if (!state.user || !state.user.email) return;
@@ -675,7 +694,7 @@ Object.assign(window, {
     // NOVOS BINDINGS DE SAAS:
     handleAuthAction, toggleAuthMode, handlePasswordReset, handleLogout, handleGoogleLogin, 
     handleCreateGroup, selectGroup, saveUserProfile, removeUserProfilePhoto, renderAdminTable, checkProfileChanges,
-    filterUserGroups, setGroupRoleFilter,
+    filterUserGroups, setGroupRoleFilter, handleDeleteAccount,
     // NOVOS BINDINGS DE PAGAMENTOS:
     setPaymentAdminTab, renderPaymentsView, savePaymentSettings, generateDailyCharges,
     toggleCaixaVisibility, addCaixaEntry, saveGeneralPaymentSettings, toggleBlockLatePlayersSection,

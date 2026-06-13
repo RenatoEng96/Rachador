@@ -1,6 +1,6 @@
 import { state } from '../state.js';
 import { calculateEloMatch, calculatePlayerFinalEloChange } from '../services/rankingService.js';
-import { db, doc, updateDoc, addDoc, playersRef, matchHistoryRef, settingsRef, setDoc } from '../firebase.js';
+import { db, doc, updateDoc, addDoc, playersRef, matchHistoryRef, settingsRef, setDoc, functions, httpsCallable } from '../firebase.js';
 import { showToast, closeVictoryModalOnly, updateLiveEloPreview, getTeamName, openConfirmModal } from '../ui.js';
 import { showInterstitialAd } from '../admobService.js';
 
@@ -377,55 +377,29 @@ export const saveAndCloseVictoryModal = async () => {
     btnSave.disabled = true;
 
     try {
-        const updatePromises = [];
-        const processedPlayerIds = new Set();
         const isTie = previewData.isTie;
-
-        const processTeam = (team, change, isWinActual, isTieActual) => {
-            team.players.forEach(p => {
-                if (processedPlayerIds.has(p.id)) return; 
-                processedPlayerIds.add(p.id);
-
-                const dbPlayer = state.players.find(x => x.id === p.id);
-                if (dbPlayer) {
-                    const partidas = (dbPlayer.partidas || 0) + 1;
-                    const vitorias = (dbPlayer.vitorias || 0) + ((isWinActual && !isTieActual) ? 1 : 0);
-                    const currentStreak = dbPlayer.streak || 0;
-                    
-                    // Empate: mantém a streak atual (não avança nem reseta)
-                    const newStreak = isTieActual ? currentStreak : (isWinActual ? (currentStreak >= 0 ? currentStreak + 1 : 1) : (currentStreak <= 0 ? currentStreak - 1 : -1));
-                    
-                    // Empate: aplica o cálculo de Elo padrão (S=0.5), sem bônus de streak
-                    const finalChange = isTieActual ? change : calculatePlayerFinalEloChange(change, isWinActual, currentStreak);
-                    const newElo = Math.max(0, (dbPlayer.eloRating ?? 0) + finalChange);
-                    
-                    updatePromises.push(updateDoc(doc(playersRef, p.id), {
-                        eloRating: newElo, partidas, vitorias, streak: newStreak, updatedAt: Date.now()
-                    }));
-                }
-            });
+        
+        // Chamada segura para o Backend (Cloud Functions)
+        const submitMatchResult = httpsCallable(functions, 'submitMatchResult');
+        const payload = {
+            groupId: state.currentGroupId,
+            team1Players: team1.players.map(p => ({ id: p.id, name: p.name })),
+            team2Players: team2.players.map(p => ({ id: p.id, name: p.name })),
+            team1Name: getTeamName(team1),
+            team2Name: getTeamName(team2),
+            score1: state.score1,
+            score2: state.score2,
+            isTie: isTie,
+            isTeam1Winner: isTeam1Winner
         };
 
-        processTeam(team1, changeT1, isTeam1Winner, isTie);
-        processTeam(team2, changeT2, !isTeam1Winner, isTie);
+        const result = await submitMatchResult(payload);
+        const data = result.data;
 
-        // Salva Histórico
-        updatePromises.push(addDoc(matchHistoryRef, {
-            timestamp: Date.now(),
-            dateString: new Date().toLocaleDateString('pt-BR'),
-            team1: { name: getTeamName(team1), score: state.score1, players: team1.players.map(p => p.name) },
-            team2: { name: getTeamName(team2), score: state.score2, players: team2.players.map(p => p.name) },
-            winner: isTie ? 0 : (isTeam1Winner ? 1 : 2),
-            eloChangeT1: changeT1,
-            eloChangeT2: changeT2,
-            eloGain: isTie ? Math.max(Math.abs(changeT1), Math.abs(changeT2)) : (isTeam1Winner ? changeT1 : changeT2)
-        }));
-
-        await Promise.all(updatePromises);
         if (isTie) {
-            showToast(`Ranking Atualizado! Empate processado (${changeT1 >= 0 ? '+' : ''}${changeT1} / ${changeT2 >= 0 ? '+' : ''}${changeT2} Elo).`, "success");
+            showToast(`Ranking Atualizado! Empate processado.`, "success");
         } else {
-            showToast(`Ranking Atualizado! +${isTeam1Winner ? changeT1 : changeT2} Elo.`, "success");
+            showToast(`Ranking Atualizado! +${isTeam1Winner ? data.changeT1 : data.changeT2} Elo.`, "success");
         }
 
         // 2. DISPARA O RESET COMPLETO (Limpa placar e desmarca times)

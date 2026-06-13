@@ -26,9 +26,14 @@
                             <h2 class="text-2xl font-black text-white mb-1">Seu Perfil</h2>
                             <p class="text-sm text-slate-400">Seus dados oficiais no Rachador.</p>
                         </div>
-                        <button onclick="handleLogout()" class="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-xl font-bold transition-all flex items-center gap-2 text-sm justify-center w-full sm:w-auto active:scale-95">
-                            <i data-lucide="log-out" class="w-4 h-4"></i> Sair
-                        </button>
+                        <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                            <button onclick="handleLogout()" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-xl font-bold transition-all flex items-center gap-2 text-sm justify-center w-full sm:w-auto active:scale-95">
+                                <i data-lucide="log-out" class="w-4 h-4"></i> Sair
+                            </button>
+                            <button onclick="handleDeleteAccount()" class="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-xl font-bold transition-all flex items-center gap-2 text-sm justify-center w-full sm:w-auto active:scale-95">
+                                <i data-lucide="user-x" class="w-4 h-4"></i> Excluir Conta
+                            </button>
+                        </div>
                     </div>
                     <div>
                         <label class="text-xs font-bold text-slate-400 mb-1 block uppercase tracking-wider">Como você quer ser chamado?</label>
